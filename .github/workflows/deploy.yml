@@ -30,8 +30,8 @@ jobs:
             --name "PlenumHub" \
             --domain https://plenumhub.com \
             --email dovydasjagm@gmail.com \
-            --operator "PlenumHub" \
-            --address "10205" \
+            --operator "Dovydas Jagminas" \
+            --address "Aukštagirio g. 18, Vilnius, 10105" \
             --country Lithuania \
             --host "GitHub Pages"
 
