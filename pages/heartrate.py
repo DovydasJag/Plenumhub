@@ -40,7 +40,7 @@ PAGE = dict(
 <p>If you enter your resting heart rate, the calculator uses the <strong>Karvonen method</strong>. This calculates zones as a percentage of your heart rate <em>reserve</em> (maximum minus resting), then adds your resting rate back. Because fitter people have lower resting rates, the zones are tailored to you. Measure your resting heart rate first thing in the morning, before getting out of bed, over two or three days, and average the readings.</p>
 
 <h2>Safety</h2>
-<p>If you have a heart condition, take medication such as beta blockers, are pregnant, or are new to exercise, ask your doctor before training at high intensity. Heart rate targets are only estimates; if you feel dizzy, get chest pain or become unusually short of breath, stop and seek medical advice. Looking to pair training with nutrition? Try the <a href="/calorie-calculator/">calorie calculator</a>.</p>
+<p>If you have a heart condition, take medication such as beta blockers, are pregnant, or are new to exercise, ask your doctor before training at high intensity. Heart rate targets are only estimates; if you feel dizzy, get chest pain or become unusually short of breath, stop and seek medical advice. Looking to pair training with nutrition? Try the <a href="/fitness/calorie-calculator/">calorie calculator</a>.</p>
 """,
     faqs=[
         ("What is a good resting heart rate?", "For most adults, a resting heart rate of 60 to 100 beats per minute is normal. Well-trained athletes often have rates in the 40s or 50s."),

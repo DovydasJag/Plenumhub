@@ -27,16 +27,16 @@ jobs:
       - name: Build site
         run: |
           python build.py \
-            --name "FitCalc" \
-            --domain https://fitcalchub.lt \
+            --name "PlenumHub" \
+            --domain https://plenumhub.com \
             --email dovydasjagm@gmail.com \
-            --operator "FitCalc" \
+            --operator "PlenumHub" \
             --address "10205" \
             --country Lithuania \
             --host "GitHub Pages"
 
       - name: Add CNAME for custom domain
-        run: echo "fitcalchub.lt" > dist/CNAME
+        run: echo "plenumhub.com" > dist/CNAME
 
       - uses: actions/upload-pages-artifact@v3
         with:

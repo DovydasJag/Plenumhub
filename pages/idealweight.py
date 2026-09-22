@@ -31,7 +31,7 @@ PAGE = dict(
 <p>The calculator also shows the weight range that corresponds to a BMI of 18.5 to 24.9 at your height. This range is wider than the formula results, and for many people it is the more practical target. Two people of the same height can both be at a healthy weight while differing by 10 kg or more because of frame size and muscle mass.</p>
 
 <h2>What these formulas leave out</h2>
-<p>None of the formulas account for age, frame size, muscle mass or body composition. A bodybuilder and a sedentary person of the same height and sex will get identical results. The formulas were also based on data from adults of average height, so they become less reliable for people shorter than about 5 feet or much taller than 6 feet 5 inches. Use them as a general reference alongside the <a href="/bmi-calculator/">BMI calculator</a>, your waist measurement and, most importantly, how you feel and what your doctor says.</p>
+<p>None of the formulas account for age, frame size, muscle mass or body composition. A bodybuilder and a sedentary person of the same height and sex will get identical results. The formulas were also based on data from adults of average height, so they become less reliable for people shorter than about 5 feet or much taller than 6 feet 5 inches. Use them as a general reference alongside the <a href="/fitness/bmi-calculator/">BMI calculator</a>, your waist measurement and, most importantly, how you feel and what your doctor says.</p>
 """,
     faqs=[
         ("Which ideal weight formula is best?", "None is universally best. Devine is the most widely used in clinical settings, while Miller tends to give higher values. Looking at the range across all four is more useful than picking one."),

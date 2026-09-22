@@ -51,7 +51,7 @@ PAGE = dict(
 
 <h2>How accurate is it?</h2>
 <p>Tape-measure methods are convenient but approximate. Compared with a DEXA scan, the Navy method is usually within about 3 to 4 percentage points for average-build people, and can be less accurate for very muscular, very lean or very heavy people. It is best used to track your own trend over time, using the same technique each time, rather than as an exact number.</p>
-<p>To see how your weight fits your height, use the <a href="/bmi-calculator/">BMI calculator</a>.</p>
+<p>To see how your weight fits your height, use the <a href="/fitness/bmi-calculator/">BMI calculator</a>.</p>
 """,
     faqs=[
         ("What is a healthy body fat percentage?", "For most adult men roughly 10 to 20% and for most adult women roughly 18 to 28% is considered healthy, though the ideal range depends on age, fitness goals and health."),

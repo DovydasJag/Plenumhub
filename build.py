@@ -25,8 +25,17 @@ import sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 
+NICHES = [
+    {"slug": "fitness", "name": "Fitness", "icon": "💪",
+     "tagline": "Free health & fitness calculators",
+     "tile": "Weight, nutrition, fitness and pregnancy calculators with plain-English explanations.",
+     "lead": "Simple, private calculators for weight, nutrition, fitness and pregnancy. Every result comes with a plain-English explanation of how it was worked out and what it means.",
+     "desc": "Free BMI, calorie, macro, body fat, ideal weight, water intake, due date and heart rate zone calculators with clear explanations."},
+]
+NICHE_BY_SLUG = {n["slug"]: n for n in NICHES}
+
 ap = argparse.ArgumentParser()
-ap.add_argument("--name", default="FitCalc Hub", help="Site name shown in header/footer")
+ap.add_argument("--name", default="PlenumHub", help="Site name shown in header/footer")
 ap.add_argument("--domain", default="https://example.com", help="Full https:// domain, no trailing slash")
 ap.add_argument("--email", default="contact@example.com", help="Public contact email for the Contact page")
 ap.add_argument("--operator", default="", help="Person or company that runs the site (Privacy Policy, Terms, Contact)")
@@ -77,6 +86,8 @@ def load_pages():
         spec.loader.exec_module(mod)
         page = mod.PAGE
         page.setdefault("kind", "calc")
+        if page["kind"] == "calc":
+            page.setdefault("niche", "fitness")
         pages.append(page)
     return pages
 
@@ -86,7 +97,7 @@ def e(s):
 
 
 def ico(p):
-    """Decorative emoji shown next to a calculator's name (hidden from screen readers)."""
+    """Decorative emoji shown next to a calculator's or niche's name (hidden from screen readers)."""
     return f'<span class="ico" aria-hidden="true">{p["icon"]}</span>' if p.get("icon") else ""
 
 
@@ -106,6 +117,7 @@ def layout(*, title, desc, path, body, calc=None, schema=None, noindex=False):
     # Google requires a link titled "Privacy and cookie settings" so visitors can change or withdraw consent.
     privacy_link = ('<a href="/privacy-policy/#consent" data-privacy-settings>Privacy and cookie settings</a>'
                     if CONSENT_HEAD else "")
+    niche_nav = "".join(f'<a href="/{n["slug"]}/">{e(n["name"])}</a>' for n in NICHES)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -130,7 +142,7 @@ def layout(*, title, desc, path, body, calc=None, schema=None, noindex=False):
 <body{calc_attr}>
 <header class="site"><div class="wrap">
 <a class="logo" href="/">{e(NAME)}</a>
-<nav class="top" aria-label="Main"><a href="/">All calculators</a><a href="/about/">About</a></nav>
+<nav class="top" aria-label="Main">{niche_nav}<a href="/about/">About</a></nav>
 </div></header>
 <main><div class="wrap">
 {body}
@@ -153,7 +165,8 @@ def write(path, content):
 
 
 def build_calc(p, all_pages):
-    path = f"/{p['slug']}/"
+    niche = NICHE_BY_SLUG[p["niche"]]
+    path = f"/{p['niche']}/{p['slug']}/"
     faq_html = "".join(
         f"<details><summary>{e(q)}</summary><p>{a}</p></details>" for q, a in p["faqs"]
     )
@@ -167,11 +180,11 @@ def build_calc(p, all_pages):
         ],
     }
     related = "".join(
-        f'<a href="/{o["slug"]}/">{ico(o)}{e(o["nav"])}</a>' for o in all_pages
-        if o["kind"] == "calc" and o["slug"] != p["slug"]
+        f'<a href="/{o["niche"]}/{o["slug"]}/">{ico(o)}{e(o["nav"])}</a>' for o in all_pages
+        if o["kind"] == "calc" and o["niche"] == p["niche"] and o["slug"] != p["slug"]
     )
     body = f"""
-<div class="crumbs"><a href="/">Home</a> &rsaquo; {e(p['nav'])}</div>
+<div class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/{niche['slug']}/">{e(niche['name'])}</a> &rsaquo; {e(p['nav'])}</div>
 <h1>{ico(p)}{e(p['h1'])}</h1>
 <p class="lead">{p['intro']}</p>
 <section class="card" aria-label="Calculator">
@@ -191,14 +204,35 @@ def build_calc(p, all_pages):
     write(path, layout(title=p["title"], desc=p["desc"], path=path, body=body, calc=p["calc"], schema=schema))
 
 
-def build_home(all_pages):
+def build_home():
     tiles = "".join(
-        f'<a class="tile" href="/{p["slug"]}/"><h3>{ico(p)}{e(p["nav"])}</h3><p>{e(p["tile"])}</p></a>'
-        for p in all_pages if p["kind"] == "calc"
+        f'<a class="tile" href="/{n["slug"]}/"><h3>{ico(n)}{e(n["name"])}</h3><p>{e(n["tile"])}</p></a>'
+        for n in NICHES
     )
     body = f"""
-<h1>Free health &amp; fitness calculators</h1>
-<p class="lead">Simple, private calculators for weight, nutrition, fitness and pregnancy. Every result comes with a plain-English explanation of how it was worked out and what it means.</p>
+<h1>{e(NAME)}: free calculators and tools</h1>
+<p class="lead">Simple, private tools with plain-English explanations of how each result was worked out and what it means.</p>
+<div class="tiles">{tiles}</div>
+<article class="prose">
+<h2>Everything is calculated in your browser</h2>
+<p>The numbers you type in are not sent to our servers or stored.</p>
+</article>
+"""
+    schema = {"@context": "https://schema.org", "@type": "WebSite", "name": NAME, "url": DOMAIN + "/"}
+    write("/", layout(title=f"{NAME}: Free Calculators and Tools",
+                      desc=f"{NAME} offers free, private calculators across several topics, starting with health and fitness.",
+                      path="/", body=body, schema=schema))
+
+
+def build_niche_home(niche, pages_in_niche):
+    tiles = "".join(
+        f'<a class="tile" href="/{niche["slug"]}/{p["slug"]}/"><h3>{ico(p)}{e(p["nav"])}</h3><p>{e(p["tile"])}</p></a>'
+        for p in pages_in_niche
+    )
+    body = f"""
+<div class="crumbs"><a href="/">Home</a> &rsaquo; {e(niche['name'])}</div>
+<h1>{e(niche['tagline'])}</h1>
+<p class="lead">{niche['lead']}</p>
 <div class="tiles">{tiles}</div>
 {ad_slot()}
 <article class="prose">
@@ -209,10 +243,9 @@ def build_home(all_pages):
 <p>These tools give estimates for healthy adults. They cannot diagnose or treat any condition. For personal medical advice, talk to a qualified healthcare professional.</p>
 </article>
 """
-    schema = {"@context": "https://schema.org", "@type": "WebSite", "name": NAME, "url": DOMAIN + "/"}
-    write("/", layout(title=f"{NAME}: Free Health & Fitness Calculators",
-                      desc="Free BMI, calorie, macro, body fat, ideal weight, water intake, due date and heart rate zone calculators with clear explanations.",
-                      path="/", body=body, schema=schema))
+    path = f"/{niche['slug']}/"
+    schema = {"@context": "https://schema.org", "@type": "CollectionPage", "name": niche["tagline"], "url": DOMAIN + path}
+    write(path, layout(title=f"{niche['tagline']}", desc=niche["desc"], path=path, body=body, schema=schema))
 
 
 def build_static(p):
@@ -239,7 +272,9 @@ def main():
              "heart-rate-zones-calculator"]
     pages.sort(key=lambda p: order.index(p["slug"]) if p["slug"] in order else 99)
 
-    build_home(pages)
+    build_home()
+    for niche in NICHES:
+        build_niche_home(niche, [p for p in pages if p["kind"] == "calc" and p["niche"] == niche["slug"]])
     for p in pages:
         if p["kind"] == "calc":
             build_calc(p, pages)
@@ -250,12 +285,13 @@ def main():
     with open(os.path.join(OUT, "404.html"), "w", encoding="utf-8") as f:
         f.write(layout(
             title="Page not found", desc="Page not found.", path="/404.html", noindex=True,
-            body='<h1>Page not found</h1><p class="lead">That page does not exist. Try one of our calculators instead.</p><p><a class="btn" href="/">See all calculators</a></p>'))
+            body='<h1>Page not found</h1><p class="lead">That page does not exist. Try one of our tools instead.</p><p><a class="btn" href="/">See all tools</a></p>'))
 
     # robots + sitemap
     with open(os.path.join(OUT, "robots.txt"), "w") as f:
         f.write(f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n")
-    urls = ["/"] + [f"/{p['slug']}/" for p in pages]
+    urls = (["/"] + [f"/{n['slug']}/" for n in NICHES]
+            + [f"/{p['niche']}/{p['slug']}/" if p["kind"] == "calc" else f"/{p['slug']}/" for p in pages])
     with open(os.path.join(OUT, "sitemap.xml"), "w") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
         for u in urls:
@@ -272,7 +308,7 @@ def main():
         with open(os.path.join(OUT, "ads.txt"), "w") as f:
             f.write(ads_txt + "\n")
 
-    print(f"Built {len(pages) + 1} pages into {OUT}  (ads {'ON' if AD_UNIT else 'off: no ad_unit.html'}, "
+    print(f"Built {len(pages) + len(NICHES) + 1} pages into {OUT}  (ads {'ON' if AD_UNIT else 'off: no ad_unit.html'}, "
           f"consent tool {'ON' if CONSENT_HEAD else 'off: no consent_head.html'})")
 
     warnings = []

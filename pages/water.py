@@ -38,7 +38,7 @@ PAGE = dict(
 
 <h2>Can you drink too much?</h2>
 <p>Yes, though it is rare. Drinking very large amounts in a short time can dilute the sodium in your blood, a condition called hyponatremia, which is a particular risk in endurance events. Spread your drinking across the day and do not force fluids well beyond thirst.</p>
-<p>Some people need special advice. If you are pregnant, breastfeeding, have kidney, heart or liver disease, or take diuretics, follow your doctor's guidance rather than this estimate. Athletes wanting to eat for performance can also use our <a href="/calorie-calculator/">calorie calculator</a>.</p>
+<p>Some people need special advice. If you are pregnant, breastfeeding, have kidney, heart or liver disease, or take diuretics, follow your doctor's guidance rather than this estimate. Athletes wanting to eat for performance can also use our <a href="/fitness/calorie-calculator/">calorie calculator</a>.</p>
 """,
     faqs=[
         ("Does coffee or tea count towards my water intake?", "Yes. In normal amounts the water in coffee and tea outweighs their mild diuretic effect, so they contribute to your daily fluid total."),

@@ -29,10 +29,10 @@ PAGE = dict(
 
 <h2>Limits of BMI</h2>
 <p>BMI cannot tell fat from muscle. A muscular athlete can land in the "overweight" range while carrying very little body fat, and an older person who has lost muscle can have a "healthy" BMI while carrying too much fat around the middle. It also ignores where fat is stored, and that matters: fat around the waist carries more health risk than fat on the hips and thighs.</p>
-<p>Some research suggests the risks of a given BMI differ between ethnic groups. For example, some guidelines use lower thresholds for people of South Asian descent. If you want a fuller picture, pair BMI with a waist measurement or try our <a href="/body-fat-calculator/">body fat calculator</a>.</p>
+<p>Some research suggests the risks of a given BMI differ between ethnic groups. For example, some guidelines use lower thresholds for people of South Asian descent. If you want a fuller picture, pair BMI with a waist measurement or try our <a href="/fitness/body-fat-calculator/">body fat calculator</a>.</p>
 
 <h2>What to do with your result</h2>
-<p>If your BMI is in the healthy range, there is nothing to fix; focus on habits such as regular activity, sleep and a varied diet. If it is above or below the healthy range, treat it as a prompt to look at the bigger picture with your doctor, who can consider your waist size, blood pressure, blood sugar, family history and lifestyle. If you want to change your weight, our <a href="/calorie-calculator/">calorie calculator</a> shows how much to eat for your goal.</p>
+<p>If your BMI is in the healthy range, there is nothing to fix; focus on habits such as regular activity, sleep and a varied diet. If it is above or below the healthy range, treat it as a prompt to look at the bigger picture with your doctor, who can consider your waist size, blood pressure, blood sugar, family history and lifestyle. If you want to change your weight, our <a href="/fitness/calorie-calculator/">calorie calculator</a> shows how much to eat for your goal.</p>
 """,
     faqs=[
         ("Is BMI accurate?", "It is a reasonable screening tool for most adults, but it is only an estimate. It cannot separate muscle from fat, so it can mislead for very muscular people, older adults and some ethnic groups."),

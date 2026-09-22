@@ -29,7 +29,7 @@ PAGE = dict(
 
 <h2>Why your real number may differ</h2>
 <p>Any formula is an average. Two people of the same age, size and sex can differ by 200 to 300 calories a day because of muscle mass, genetics, sleep, stress and how much they fidget or walk through the day. The best approach is to use the result as a starting point, eat that amount consistently for two to three weeks, and watch what your weight does. If it does not move the way you expected, adjust by 100 to 200 calories.</p>
-<p>Once you have a target, use our <a href="/macro-calculator/">macro calculator</a> to split it into protein, carbohydrates and fat.</p>
+<p>Once you have a target, use our <a href="/fitness/macro-calculator/">macro calculator</a> to split it into protein, carbohydrates and fat.</p>
 """,
     faqs=[
         ("What is the difference between BMR and TDEE?", "BMR is what you burn at complete rest. TDEE is BMR plus the calories you burn through daily movement and exercise, so it is the number that matters for planning what to eat."),
