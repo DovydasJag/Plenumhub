@@ -1,7 +1,9 @@
-# Health & fitness calculator site
+# PlenumHub
 
-Eight calculators (BMI, calorie, macro, body fat, ideal weight, water intake, pregnancy due date,
-heart rate zones) plus About, Contact, Privacy Policy and Medical Disclaimer pages.
+A hub of free calculators grouped by topic ("niche"). Each niche has its own page at `/<niche>/` and its
+calculators live at `/<niche>/<calculator>/`. The first niche is Fitness: eight calculators (BMI, calorie, macro,
+body fat, ideal weight, water intake, pregnancy due date, heart rate zones). The site also has About, Contact,
+Privacy Policy, Terms of Use and Medical Disclaimer pages.
 Plain HTML/CSS/JS output: no database, no server code.
 
 ## 1. Build the site
@@ -51,5 +53,41 @@ re-read the Privacy Policy whenever you add analytics, affiliate links or anothe
 
 ## Adding another calculator
 
-Copy one file in `pages/`, edit the text, add matching logic to `static/calc.js` (a function in `Calc` plus a
-handler keyed by the `calc` name), add the slug to `order` in `build.py`, and rebuild.
+1. Copy one file in `pages/` and edit the text (`slug`, `nav`, `title`, `intro`, `form`, `article`, `faqs`...).
+2. Set `niche="..."` to the slug of the niche it belongs to. If you leave it out, the calculator goes under
+   `fitness` and gets the medical disclaimer, so always set it for non-fitness calculators.
+3. Add the maths to `static/calc.js`: a function in `Calc`, plus a handler in `handlers` keyed by the page's
+   `calc` name.
+4. Add the slug to `order` in `build.py` so it appears in the right position (anything not listed goes last).
+5. Rebuild and check it locally (see below).
+
+## Adding a new niche
+
+Add an entry to `NICHES` in `build.py`. Every key is required:
+
+| Key | What it is |
+|---|---|
+| `slug` | URL folder, e.g. `finance` gives `/finance/` |
+| `name` | Short name for the top menu and breadcrumbs |
+| `icon` | Emoji shown on the homepage tile |
+| `tagline` | Heading and page title of the niche page |
+| `tile` | One-line description on the homepage tile |
+| `lead` | Intro paragraph under the niche page heading |
+| `desc` | Meta description for search engines |
+| `about` | HTML shown on the niche page below the calculator tiles |
+| `disclaimer` | HTML for the box near the bottom of every calculator in the niche |
+
+Then add calculators to it as described above. The niche is added to the top menu, the homepage and the
+sitemap automatically. If the new topic needs its own legal wording (for example a financial disclaimer page),
+add a page in `pages/` with `kind="static"` and link to it from the niche's `disclaimer`.
+
+## Checking changes locally
+
+The pages link to `/assets/...`, so open them through a local server, not by double-clicking the files:
+
+    python3 build.py --name "PlenumHub" --domain https://plenumhub.com --email dovydasjagm@gmail.com \
+      --operator "Dovydas Jagminas" --address "Aukštagirio g. 18, Vilnius, 10105" --country Lithuania --host "GitHub Pages"
+    cd dist && python3 -m http.server 8000
+
+Then open http://localhost:8000. Pushing to `main` builds and deploys the live site automatically
+(`.github/workflows/deploy.yml`).
