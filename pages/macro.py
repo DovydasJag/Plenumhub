@@ -26,7 +26,7 @@ PAGE = dict(
     title="Macro Calculator: Daily Protein, Carbs and Fat in Grams",
     desc="Free macro calculator. Enter your calorie target and diet style to get daily grams of protein, carbohydrates and fat, plus a per-meal breakdown.",
     h1="Macro Calculator",
-    intro="Turn your daily calorie target into grams of protein, carbohydrates and fat. Not sure of your calories? Use the <a href=\"/calorie-calculator/\">calorie calculator</a> first.",
+    intro="Turn your daily calorie target into grams of protein, carbohydrates and fat. Not sure of your calories? Use the <a href=\"/fitness/calorie-calculator/\">calorie calculator</a> first.",
     form=form(FIELDS, "Calculate macros"),
     article="""
 <h2>What are macros?</h2>
