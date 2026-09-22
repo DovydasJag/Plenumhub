@@ -12,7 +12,7 @@ PAGE = dict(
 <p>{SITE_NAME} is operated by {SITE_OPERATOR}, {SITE_ADDRESS}. You can contact us at <a href="mailto:{SITE_EMAIL}">{SITE_EMAIL}</a>. We are the controller of the personal data described in this policy.</p>
 
 <h2>Information you enter into calculators</h2>
-<p>All calculations happen in your web browser. The values you type into our calculators, such as your weight, height, age or dates, are not sent to our servers and we do not store them.</p>
+<p>All calculations happen in your web browser. The values you type into our calculators, such as your weight, age, dates or amounts, are not sent to our servers and we do not store them.</p>
 
 <h2>Information collected automatically</h2>
 <p>Our hosting provider, {SITE_HOST}, may keep standard server logs that include your IP address, browser type, the pages you request and the time of the request. We use these logs for security and to keep the site running, and we do not combine them with other information about you. We may add privacy-respecting analytics to understand which pages are used; if we do, this policy will be updated.</p>

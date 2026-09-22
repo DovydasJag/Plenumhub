@@ -30,7 +30,15 @@ NICHES = [
      "tagline": "Free health & fitness calculators",
      "tile": "Weight, nutrition, fitness and pregnancy calculators with plain-English explanations.",
      "lead": "Simple, private calculators for weight, nutrition, fitness and pregnancy. Every result comes with a plain-English explanation of how it was worked out and what it means.",
-     "desc": "Free BMI, calorie, macro, body fat, ideal weight, water intake, due date and heart rate zone calculators with clear explanations."},
+     "desc": "Free BMI, calorie, macro, body fat, ideal weight, water intake, due date and heart rate zone calculators with clear explanations.",
+     # Shown on the niche page below the tiles
+     "about": """<h2>How these calculators work</h2>
+<p>Each tool uses a published, widely used formula, such as the Mifflin-St Jeor equation for calorie needs or the U.S. Navy method for body fat. Every page explains the formula, its limits, and how to interpret your result.</p>
+<p>Everything is calculated in your browser. The numbers you type in are not sent to our servers or stored.</p>
+<h2>Please read</h2>
+<p>These tools give estimates for healthy adults. They cannot diagnose or treat any condition. For personal medical advice, talk to a qualified healthcare professional.</p>""",
+     # Shown near the bottom of every calculator page in this niche
+     "disclaimer": '<strong>Not medical advice.</strong> This calculator gives general estimates for adults and is not a substitute for professional advice. Speak to a doctor or registered dietitian before making significant changes to your diet or exercise, especially if you have a medical condition or are pregnant. <a href="/medical-disclaimer/">Read the full disclaimer</a>.'},
 ]
 NICHE_BY_SLUG = {n["slug"]: n for n in NICHES}
 
@@ -149,7 +157,7 @@ def layout(*, title, desc, path, body, calc=None, schema=None, noindex=False):
 </div></main>
 <footer class="site"><div class="wrap">
 <a href="/about/">About</a><a href="/contact/">Contact</a><a href="/privacy-policy/">Privacy Policy</a><a href="/terms-of-use/">Terms of Use</a><a href="/medical-disclaimer/">Medical Disclaimer</a>{privacy_link}
-<p>&copy; {YEAR} {e(NAME)}. For information only; not medical advice.</p>
+<p>&copy; {YEAR} {e(NAME)}. For general information only; results are estimates, not professional advice.</p>
 </div></footer>
 {scripts}
 </body>
@@ -197,7 +205,7 @@ def build_calc(p, all_pages):
 <div class="faq">{faq_html}</div>
 </article>
 {ad_slot()}
-<div class="disclaimer"><strong>Not medical advice.</strong> This calculator gives general estimates for adults and is not a substitute for professional advice. Speak to a doctor or registered dietitian before making significant changes to your diet or exercise, especially if you have a medical condition or are pregnant. <a href="/medical-disclaimer/">Read the full disclaimer</a>.</div>
+<div class="disclaimer">{niche['disclaimer']}</div>
 <h2>More calculators</h2>
 <div class="related">{related}</div>
 """
@@ -236,11 +244,7 @@ def build_niche_home(niche, pages_in_niche):
 <div class="tiles">{tiles}</div>
 {ad_slot()}
 <article class="prose">
-<h2>How these calculators work</h2>
-<p>Each tool uses a published, widely used formula, such as the Mifflin-St Jeor equation for calorie needs or the U.S. Navy method for body fat. Every page explains the formula, its limits, and how to interpret your result.</p>
-<p>Everything is calculated in your browser. The numbers you type in are not sent to our servers or stored.</p>
-<h2>Please read</h2>
-<p>These tools give estimates for healthy adults. They cannot diagnose or treat any condition. For personal medical advice, talk to a qualified healthcare professional.</p>
+{niche['about']}
 </article>
 """
     path = f"/{niche['slug']}/"
