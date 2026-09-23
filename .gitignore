@@ -1,7 +1,6 @@
 dist/
 __pycache__/
 *.pyc
-ads_head.html
 ad_unit.html
 consent_head.html
 ads.txt
