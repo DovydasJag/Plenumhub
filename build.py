@@ -9,8 +9,10 @@ Legal details for the Privacy Policy, Terms and Contact pages (a highlighted pla
 
 Ads: put your ad network's <head> script in  ads_head.html  and one ad unit in  ad_unit.html
 (both next to this file), then rebuild. Until those files exist, no ad slots are rendered.
-Consent: put your consent tool's <head> script in  consent_head.html. It loads before the ad script, and a
-"Privacy and cookie settings" link is added to the footer. Required before ads go live for EEA/UK/Swiss visitors.
+Consent: with AdSense, the GDPR message published in Privacy & messaging is served by the AdSense script itself,
+so no extra file is needed. Only if you use a separate consent tool, put its <head> script in  consent_head.html;
+it loads before the ad script. Whenever ads or a consent tool are on, a "Privacy and cookie settings" link is added
+to the footer.
 """
 import argparse
 import datetime
@@ -119,6 +121,7 @@ def read_optional(name):
 ADS_HEAD = read_optional("ads_head.html")
 AD_UNIT = read_optional("ad_unit.html")
 CONSENT_HEAD = read_optional("consent_head.html")
+CONSENT_ON = bool(CONSENT_HEAD or ADS_HEAD)
 
 # Cache-busting version for /assets/*: a short hash of every static file's contents. /assets/*
 # is served with a year-long "immutable" Cache-Control (see main()), so without this, browsers
@@ -178,13 +181,13 @@ def layout(*, title, desc, path, body, calc=None, schema=None, noindex=False):
     calc_attr = f' data-calc="{calc}"' if calc else ""
     scripts = f'<script src="/assets/calc.js?v={ASSET_VER}" defer></script>' if calc else ""
     scripts += f'<script src="/assets/search.js?v={ASSET_VER}" defer></script>'
-    if CONSENT_HEAD:
+    if CONSENT_ON:
         scripts += f'<script src="/assets/consent.js?v={ASSET_VER}" defer></script>'
     ld = f'<script type="application/ld+json">{json.dumps(schema)}</script>' if schema else ""
     robots = '<meta name="robots" content="noindex">' if noindex else ""
     # Google requires a link titled "Privacy and cookie settings" so visitors can change or withdraw consent.
     privacy_link = ('<a href="/privacy-policy/#consent" data-privacy-settings>Privacy and cookie settings</a>'
-                    if CONSENT_HEAD else "")
+                    if CONSENT_ON else "")
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -385,7 +388,7 @@ def main():
             f.write(ads_txt + "\n")
 
     print(f"Built {len(pages) + len(NICHES) + 1} pages into {OUT}  (ads {'ON' if AD_UNIT else 'off: no ad_unit.html'}, "
-          f"consent tool {'ON' if CONSENT_HEAD else 'off: no consent_head.html'})")
+          f"consent link {'ON' if CONSENT_ON else 'off'})")
 
     warnings = []
     if MISSING:
@@ -393,9 +396,6 @@ def main():
                         + ", ".join(MISSING) + ". Pass --operator, --address, --country and --host.")
     if EMAIL.endswith("@example.com"):
         warnings.append("Contact email is still the example.com placeholder. Pass --email.")
-    if (AD_UNIT or ADS_HEAD) and not CONSENT_HEAD:
-        warnings.append("Ads are on but consent_head.html is missing. Do not publish: visitors in the EEA, UK and "
-                        "Switzerland must be asked for consent before ads load.")
     for w in warnings:
         print("WARNING:", w)
 

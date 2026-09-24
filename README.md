@@ -37,10 +37,12 @@ Alternative: buy a Hostinger web hosting plan and upload the contents of `dist/`
 5. Rebuild and re-upload.
 6. For visitors in the EU/EEA, UK and Switzerland you need a Google-certified consent message. In AdSense turn on
    Privacy & messaging, publish a GDPR message, and also the US state regulations message.
-7. Privacy & messaging gives you a script. Save it as `consent_head.html` next to `build.py`. The build loads it
-   before the ad script and adds a "Privacy and cookie settings" link to every footer, which reopens the consent
-   message so visitors can change or withdraw consent (Google requires this link). The build warns you if ads
-   are on but `consent_head.html` is missing.
+7. The message is served by the AdSense script (`ads_head.html`) itself, so no extra file is needed. It only
+   starts showing once AdSense has fully approved the site. While ads are on, the build adds a "Privacy and cookie
+   settings" link to every footer, which reopens the message so visitors can change or withdraw consent. Before
+   relying on ads, check the message actually appears in a private window from an EU/UK connection.
+   (Only if you use a different consent tool instead: save its `<head>` script as `consent_head.html`; it loads
+   before the ad script.)
 
 Until `ad_unit.html` exists, no ad space is shown. Ad slots reserve 250px of height so the page does not jump when
 an ad loads; change `--ad-min` in `static/style.css` if you use smaller or larger units. Unfilled slots collapse.
