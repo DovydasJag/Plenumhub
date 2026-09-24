@@ -84,6 +84,188 @@
         return { name: b[2], desc: b[3], lo: f(b[0]), hi: f(b[1]), pct: Math.round(b[0] * 100) + '-' + Math.round(b[1] * 100) + '%' };
       });
       return { max: Math.round(max), zones: out, karvonen: rest > 0 };
+    },
+
+    percentOf: function (pct, y) { return (pct / 100) * y; },
+    whatPercent: function (x, y) { return (x / y) * 100; },
+    percentChange: function (from, to) { return ((to - from) / from) * 100; },
+
+    tip: function (bill, pct, people) {
+      var t = bill * (pct / 100), total = bill + t;
+      return { tip: t, total: total, perPerson: total / people, tipPerPerson: t / people };
+    },
+
+    // Calendar-accurate y/m/d breakdown plus total days between two UTC dates (date2 must not be before date1).
+    // Finds the largest whole number of months that can be added to date1 (via Date.UTC's own
+    // month/day overflow normalization) without passing date2, then the remainder is exact days.
+    // A naive "borrow days from the previous month" approach breaks when the start day-of-month
+    // (e.g. the 31st) exceeds the length of the month being borrowed from, so this avoids that.
+    ymdDiff: function (y1, m1, d1, y2, m2, d2) {
+      var DAY = 86400000;
+      var end = Date.UTC(y2, m2, d2);
+      var totalDays = Math.round((end - Date.UTC(y1, m1, d1)) / DAY);
+      var totalMonths = (y2 - y1) * 12 + (m2 - m1);
+      while (totalMonths > 0 && Date.UTC(y1, m1 + totalMonths, d1) > end) { totalMonths--; }
+      while (totalMonths < 0 && Date.UTC(y1, m1 + totalMonths, d1) < end) { totalMonths++; }
+      var days = Math.round((end - Date.UTC(y1, m1 + totalMonths, d1)) / DAY);
+      return { years: Math.trunc(totalMonths / 12), months: totalMonths % 12, days: days, totalDays: totalDays };
+    },
+
+    // Exact age as of a reference date, using Date.UTC's own day-overflow rules for Feb 29 birthdays
+    // in non-leap years (Date.UTC(year, 1, 29) rolls forward to March 1), so no leap-year special-casing is needed.
+    age: function (dobY, dobM, dobD, refY, refM, refD) {
+      var DAY = 86400000;
+      var b = Calc.ymdDiff(dobY, dobM, dobD, refY, refM, refD);
+      var ref = Date.UTC(refY, refM, refD);
+      var thisYear = Date.UTC(refY, dobM, dobD);
+      var daysToThisYear = Math.round((thisYear - ref) / DAY);
+      var nextBirthday, daysToNext;
+      if (daysToThisYear >= 0) {
+        nextBirthday = thisYear; daysToNext = daysToThisYear;
+      } else {
+        nextBirthday = Date.UTC(refY + 1, dobM, dobD);
+        daysToNext = Math.round((nextBirthday - ref) / DAY);
+      }
+      return {
+        years: b.years, months: b.months, days: b.days,
+        totalDays: b.totalDays, totalWeeks: Math.floor(b.totalDays / 7),
+        nextBirthday: nextBirthday, daysToNextBirthday: daysToNext,
+        weekday: new Date(Date.UTC(dobY, dobM, dobD)).getUTCDay()
+      };
+    },
+
+    // Calendar-accurate difference between any two dates, either order.
+    dateDiff: function (y1, m1, d1, y2, m2, d2) {
+      var swapped = Date.UTC(y2, m2, d2) < Date.UTC(y1, m1, d1);
+      var b = swapped ? Calc.ymdDiff(y2, m2, d2, y1, m1, d1) : Calc.ymdDiff(y1, m1, d1, y2, m2, d2);
+      return {
+        years: b.years, months: b.months, days: b.days,
+        totalDays: Math.abs(b.totalDays), totalWeeks: Math.floor(Math.abs(b.totalDays) / 7),
+        totalMonths: b.years * 12 + b.months, swapped: swapped
+      };
+    },
+
+    electricity: function (watts, hoursPerDay, pricePerKwh, daysPerMonth) {
+      var kwhDay = (watts / 1000) * hoursPerDay;
+      var kwhMonth = kwhDay * daysPerMonth, kwhYear = kwhDay * 365;
+      return {
+        kwhDay: kwhDay, kwhMonth: kwhMonth, kwhYear: kwhYear,
+        costDay: kwhDay * pricePerKwh, costMonth: kwhMonth * pricePerKwh, costYear: kwhYear * pricePerKwh
+      };
+    },
+
+    convert: function (amount, rate) { return amount * rate; },
+
+    factorial: function (n) {
+      if (n < 0 || Math.floor(n) !== n) { throw new Error('Factorial needs a non-negative whole number.'); }
+      if (n > 170) { return Infinity; }
+      var r = 1;
+      for (var i = 2; i <= n; i++) { r *= i; }
+      return r;
+    },
+
+    // Small recursive-descent parser/evaluator for scientific-calculator expressions.
+    // Grammar: expr := term (('+'|'-') term)*; term := unary (('*'|'/') unary)*;
+    // unary := ('-'|'+') unary | power; power := postfix ('^' unary)?; postfix := primary '!'?;
+    // primary := number | const | IDENT '(' expr ')' | '(' expr ')'
+    // Trig functions (sin/cos/tan/asin/acos/atan) work in degrees.
+    evalExpr: function (str) {
+      var i = 0, n = str.length;
+      var skip = function () { while (i < n && /\s/.test(str[i])) { i++; } };
+      var CONSTS = { pi: Math.PI, e: Math.E };
+      var FUNCS = {
+        sin: function (x) { return Math.sin(x * Math.PI / 180); },
+        cos: function (x) { return Math.cos(x * Math.PI / 180); },
+        tan: function (x) { return Math.tan(x * Math.PI / 180); },
+        asin: function (x) { return Math.asin(x) * 180 / Math.PI; },
+        acos: function (x) { return Math.acos(x) * 180 / Math.PI; },
+        atan: function (x) { return Math.atan(x) * 180 / Math.PI; },
+        sqrt: Math.sqrt, log: Math.log10, ln: Math.log, abs: Math.abs
+      };
+
+      var parseExpr, parseTerm, parseUnary, parsePower, parsePostfix, parsePrimary;
+
+      parseExpr = function () {
+        var v = parseTerm();
+        skip();
+        while (i < n && (str[i] === '+' || str[i] === '-')) {
+          var op = str[i]; i++;
+          var rhs = parseTerm();
+          v = op === '+' ? v + rhs : v - rhs;
+          skip();
+        }
+        return v;
+      };
+      parseTerm = function () {
+        var v = parseUnary();
+        skip();
+        while (i < n && (str[i] === '*' || str[i] === '/')) {
+          var op = str[i]; i++;
+          var rhs = parseUnary();
+          if (op === '/') {
+            if (rhs === 0) { throw new Error('Cannot divide by zero.'); }
+            v = v / rhs;
+          } else { v = v * rhs; }
+          skip();
+        }
+        return v;
+      };
+      parseUnary = function () {
+        skip();
+        if (i < n && str[i] === '-') { i++; return -parseUnary(); }
+        if (i < n && str[i] === '+') { i++; return parseUnary(); }
+        return parsePower();
+      };
+      parsePower = function () {
+        var v = parsePostfix();
+        skip();
+        if (i < n && str[i] === '^') { i++; return Math.pow(v, parseUnary()); }
+        return v;
+      };
+      parsePostfix = function () {
+        var v = parsePrimary();
+        skip();
+        while (i < n && str[i] === '!') { i++; v = Calc.factorial(v); skip(); }
+        return v;
+      };
+      parsePrimary = function () {
+        skip();
+        if (i >= n) { throw new Error('Unexpected end of expression.'); }
+        if (str[i] === '(') {
+          i++; var v = parseExpr(); skip();
+          if (str[i] !== ')') { throw new Error('Missing closing parenthesis.'); }
+          i++; return v;
+        }
+        if (/[0-9.]/.test(str[i])) {
+          var start = i;
+          while (i < n && /[0-9.]/.test(str[i])) { i++; }
+          var num = parseFloat(str.slice(start, i));
+          if (isNaN(num)) { throw new Error('Invalid number.'); }
+          return num;
+        }
+        if (/[a-zA-Z]/.test(str[i])) {
+          var s2 = i;
+          while (i < n && /[a-zA-Z]/.test(str[i])) { i++; }
+          var name = str.slice(s2, i).toLowerCase();
+          skip();
+          if (name in CONSTS) { return CONSTS[name]; }
+          if (name in FUNCS) {
+            if (str[i] !== '(') { throw new Error('Expected "(" after ' + name + '.'); }
+            i++; var arg = parseExpr(); skip();
+            if (str[i] !== ')') { throw new Error('Missing closing parenthesis.'); }
+            i++; return FUNCS[name](arg);
+          }
+          throw new Error('Unknown name "' + name + '".');
+        }
+        throw new Error('Unexpected character "' + str[i] + '".');
+      };
+
+      if (!str || !str.trim()) { throw new Error('Please enter an expression.'); }
+      var result = parseExpr();
+      skip();
+      if (i < n) { throw new Error('Unexpected character "' + str[i] + '".'); }
+      if (!isFinite(result)) { throw new Error('Result is too large or undefined.'); }
+      return result;
     }
   };
 
@@ -133,7 +315,51 @@
     return '<div class="stat"><span class="k">' + label + '</span><span class="v">' + value + '</span>' +
       (note ? '<span class="n">' + note + '</span>' : '') + '</div>';
   };
+  // Up to 6 decimal places, trimmed of trailing zeros (and a trailing dot), for scientific-calculator results.
+  var fmtSci = function (n) {
+    var s = n.toLocaleString('en-US', { maximumFractionDigits: 6, useGrouping: false });
+    return s;
+  };
   var sexVal = function () { return $('sex') ? $('sex').value : 'male'; };
+  // yyyy-mm-dd from a <input type=date>, as {y, m (0-indexed), d}, or null if empty/invalid.
+  var parseDate = function (id) {
+    var v = $(id) ? $(id).value : '';
+    if (!v) { return null; }
+    var p = v.split('-').map(Number);
+    if (p.length !== 3 || p.some(isNaN)) { return null; }
+    return { y: p[0], m: p[1] - 1, d: p[2] };
+  };
+  var todayUTC = function () {
+    var n = new Date();
+    return { y: n.getFullYear(), m: n.getMonth(), d: n.getDate() };
+  };
+  var fmtDate = function (ts) {
+    return new Date(ts).toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' });
+  };
+  var WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  // Cached per "from" currency for the lifetime of the page, so typing a new amount (or swapping)
+  // doesn't re-fetch: only the first lookup for a given base currency hits the network.
+  var currencyRateCache = {};
+  var currencyReqId = 0;
+  var getRates = function (from) {
+    if (currencyRateCache[from]) { return Promise.resolve(currencyRateCache[from]); }
+    return fetch('https://open.er-api.com/v6/latest/' + from)
+      .then(function (r) { if (!r.ok) { throw new Error('bad response'); } return r.json(); })
+      .then(function (data) {
+        if (data.result !== 'success' || !data.rates) { throw new Error('bad data'); }
+        currencyRateCache[from] = data;
+        return data;
+      });
+  };
+  var debounce = function (fn, ms) {
+    var t;
+    return function () {
+      var args = arguments;
+      clearTimeout(t);
+      t = setTimeout(function () { fn.apply(null, args); }, ms);
+    };
+  };
 
   var handlers = {
     bmi: function () {
@@ -266,6 +492,136 @@
         '<div class="tablewrap"><table><thead><tr><th>Zone</th><th>Intensity</th><th>Target heart rate</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
         '<p class="note">' + (r.karvonen ? 'Zones use the Karvonen (heart rate reserve) method with your resting heart rate.' : 'Add your resting heart rate for a more personal result (Karvonen method).') +
         ' Maximum heart rate varies a lot between individuals, so use how hard the effort feels as a cross-check.</p>');
+    },
+
+    percentage: function () {
+      var mode = $('mode').value;
+      if (mode === 'of') {
+        var x = num('of_x'), y = num('of_y');
+        if (isNaN(x) || isNaN(y)) { return err('Please fill in both numbers.'); }
+        var r = Calc.percentOf(x, y);
+        return out('<div class="stats">' + stat(fmt(x, 2) + '% of ' + fmt(y, 2), fmt(r, 2)) + '</div>' +
+          '<p class="note">' + fmt(x, 2) + '% of ' + fmt(y, 2) + ' = (' + fmt(x, 2) + ' &divide; 100) &times; ' + fmt(y, 2) + ' = ' + fmt(r, 2) + '.</p>');
+      }
+      if (mode === 'what') {
+        var px = num('what_x'), py = num('what_y');
+        if (isNaN(px) || isNaN(py)) { return err('Please fill in both numbers.'); }
+        if (py === 0) { return err('The whole (Y) cannot be zero.'); }
+        var rp = Calc.whatPercent(px, py);
+        return out('<div class="stats">' + stat(fmt(px, 2) + ' as a % of ' + fmt(py, 2), fmt(rp, 2) + '%') + '</div>' +
+          '<p class="note">' + fmt(px, 2) + ' &divide; ' + fmt(py, 2) + ' &times; 100 = ' + fmt(rp, 2) + '%.</p>');
+      }
+      var cx = num('chg_x'), cy = num('chg_y');
+      if (isNaN(cx) || isNaN(cy)) { return err('Please fill in both numbers.'); }
+      if (cx === 0) { return err('The "from" value (X) cannot be zero.'); }
+      var rc = Calc.percentChange(cx, cy);
+      var word = rc > 0 ? 'increase' : rc < 0 ? 'decrease' : 'change';
+      out('<div class="stats">' + stat('Change from ' + fmt(cx, 2) + ' to ' + fmt(cy, 2), (rc > 0 ? '+' : '') + fmt(rc, 2) + '%', 'A ' + fmt(Math.abs(rc), 2) + '% ' + word) + '</div>' +
+        '<p class="note">(' + fmt(cy, 2) + ' &minus; ' + fmt(cx, 2) + ') &divide; ' + fmt(cx, 2) + ' &times; 100 = ' + fmt(rc, 2) + '%.</p>');
+    },
+
+    tip: function () {
+      var bill = num('bill'), pct = num('tip_pct'), people = num('people') || 1;
+      if (bad(bill)) { return err('Please enter the bill amount.'); }
+      if (isNaN(pct) || pct < 0) { return err('Please enter a tip percent of 0 or more.'); }
+      people = Math.max(1, Math.round(people));
+      var r = Calc.tip(bill, pct, people);
+      out('<div class="stats">' + stat('Tip', fmt(r.tip, 2)) + stat('Total bill', fmt(r.total, 2)) +
+        stat('Per person', fmt(r.perPerson, 2), people > 1 ? 'Split ' + people + ' ways' : '') + '</div>' +
+        (people > 1 ? '<p class="note">Tip per person: ' + fmt(r.tipPerPerson, 2) + '.</p>' : ''));
+    },
+
+    age: function () {
+      var dob = parseDate('dob');
+      if (!dob) { return err('Please enter your date of birth.'); }
+      var asof = parseDate('asof') || todayUTC();
+      var dobTs = Date.UTC(dob.y, dob.m, dob.d), refTs = Date.UTC(asof.y, asof.m, asof.d);
+      if (dobTs > refTs) { return err('Date of birth cannot be after the "as of" date.'); }
+      var r = Calc.age(dob.y, dob.m, dob.d, asof.y, asof.m, asof.d);
+      out('<div class="stats">' + stat('Age', r.years + ' years, ' + r.months + ' months, ' + r.days + ' days') +
+        stat('Next birthday', r.daysToNextBirthday === 0 ? 'Today!' : r.daysToNextBirthday + ' days', fmtDate(r.nextBirthday)) + '</div>' +
+        '<div class="tablewrap"><table><tbody>' +
+        '<tr><td>Born on a</td><td>' + WEEKDAYS[r.weekday] + '</td></tr>' +
+        '<tr><td>Total days alive</td><td>' + fmt(r.totalDays, 0) + '</td></tr>' +
+        '<tr><td>Total weeks alive</td><td>' + fmt(r.totalWeeks, 0) + '</td></tr>' +
+        '</tbody></table></div>' +
+        '<p class="note">Calculated using calendar-accurate day arithmetic, as of ' + fmtDate(refTs) + '.</p>');
+    },
+
+    datediff: function () {
+      var d1 = parseDate('date1'), d2 = parseDate('date2');
+      if (!d1 || !d2) { return err('Please enter both dates.'); }
+      var r = Calc.dateDiff(d1.y, d1.m, d1.d, d2.y, d2.m, d2.d);
+      out('<div class="stats">' + stat('Time between dates', r.years + 'y ' + r.months + 'm ' + r.days + 'd') +
+        stat('Total days', fmt(r.totalDays, 0)) + '</div>' +
+        '<div class="tablewrap"><table><tbody>' +
+        '<tr><td>Total weeks</td><td>' + fmt(r.totalWeeks, 0) + '</td></tr>' +
+        '<tr><td>Total months (approx.)</td><td>' + fmt(r.totalMonths, 0) + '</td></tr>' +
+        '</tbody></table></div>' +
+        (r.swapped ? '<p class="note">The second date is earlier than the first, so this is the gap between them either way.</p>' : ''));
+    },
+
+    electricity: function () {
+      var watts = num('watts'), hours = num('hours'), price = num('price'), days = num('days');
+      if (bad(watts)) { return err('Please enter the appliance wattage.'); }
+      if (isNaN(hours) || hours < 0) { return err('Please enter hours used per day (0 or more).'); }
+      if (isNaN(price) || price < 0) { return err('Please enter a price per kWh of 0 or more.'); }
+      if (isNaN(days) || days <= 0) { days = 30; }
+      var r = Calc.electricity(watts, hours, price, days);
+      out('<div class="stats">' + stat('Cost per day', fmt(r.costDay, 2), fmt(r.kwhDay, 2) + ' kWh') +
+        stat('Cost per month', fmt(r.costMonth, 2), fmt(r.kwhMonth, 2) + ' kWh, ' + fmt(days, 0) + ' days') +
+        stat('Cost per year', fmt(r.costYear, 2), fmt(r.kwhYear, 2) + ' kWh') + '</div>' +
+        '<p class="note">kWh = (watts &divide; 1000) &times; hours used. Cost = kWh &times; your price per kWh.</p>');
+    },
+
+    scientific: function () {
+      var exprEl = $('expr'), expr = exprEl ? exprEl.value : '';
+      var v;
+      try {
+        v = Calc.evalExpr(expr);
+      } catch (e) {
+        return err(e.message);
+      }
+      // The answer replaces the expression itself (like a real calculator), so you can keep
+      // building on it (e.g. type "+5" and hit = again), rather than reading it from a separate box.
+      res.hidden = true;
+      res.innerHTML = '';
+      exprEl.value = fmtSci(v);
+      exprEl.focus();
+    },
+
+    currency: function () {
+      var amountResult = $('amountResult'), rateNote = $('rateNote');
+      var from = $('from').value, to = $('to').value, amount = num('amount');
+      res.hidden = true;
+      res.innerHTML = '';
+      if (isNaN(amount)) { amountResult.innerHTML = '&nbsp;'; rateNote.innerHTML = '&nbsp;'; return; }
+      if (amount <= 0) { return err('Please enter an amount greater than 0.'); }
+      if (from === to) {
+        amountResult.textContent = fmt(amount, 2) + ' ' + to;
+        rateNote.textContent = 'Same currency on both sides, so the amount is unchanged.';
+        return;
+      }
+      var myReq = ++currencyReqId;
+      if (!currencyRateCache[from]) {
+        amountResult.textContent = 'Fetching rate…';
+        rateNote.innerHTML = '&nbsp;';
+      }
+      getRates(from)
+        .then(function (data) {
+          if (myReq !== currencyReqId) { return; } // superseded by a newer keystroke/selection
+          if (!(to in data.rates)) { throw new Error('missing rate'); }
+          var rate = data.rates[to], converted = Calc.convert(amount, rate);
+          amountResult.textContent = fmt(converted, 2) + ' ' + to;
+          var updated = (data.time_last_update_utc || 'recently').replace(/\s*\+0000$/, '');
+          rateNote.textContent = 'Rates last updated ' + updated + '.';
+        })
+        .catch(function () {
+          if (myReq !== currencyReqId) { return; }
+          amountResult.innerHTML = '&nbsp;';
+          rateNote.innerHTML = '&nbsp;';
+          err('Could not fetch live exchange rates right now. Please check your connection and try again.');
+        });
     }
   };
 
@@ -273,13 +629,81 @@
     form.setAttribute('data-unit', unit());
     var fem = document.querySelectorAll('.only-female');
     for (var i = 0; i < fem.length; i++) { fem[i].hidden = sexVal() !== 'female'; }
+    var modeSel = $('mode');
+    if (modeSel) {
+      var groups = document.querySelectorAll('[data-mode-group]');
+      for (var j = 0; j < groups.length; j++) {
+        groups[j].hidden = groups[j].getAttribute('data-mode-group') !== modeSel.value;
+      }
+    }
   };
+
+  // Quick-select chips (e.g. tip percent presets): clicking one fills the target input.
+  var chips = document.querySelectorAll('.chip');
+  for (var c = 0; c < chips.length; c++) {
+    chips[c].addEventListener('click', function () {
+      var target = $(this.getAttribute('data-target'));
+      if (!target) { return; }
+      target.value = this.getAttribute('data-val');
+      var active = document.querySelectorAll('.chip[data-target="' + this.getAttribute('data-target') + '"]');
+      for (var k = 0; k < active.length; k++) { active[k].setAttribute('aria-pressed', active[k] === this ? 'true' : 'false'); }
+    });
+  }
+
+  // Scientific calculator key pad: appends to #expr, with AC (clear) and DEL (backspace) actions.
+  var keys = document.querySelectorAll('.key[data-k]');
+  for (var kx = 0; kx < keys.length; kx++) {
+    keys[kx].addEventListener('click', function () {
+      var expr = $('expr');
+      if (!expr) { return; }
+      var k = this.getAttribute('data-k');
+      if (k === 'AC') { expr.value = ''; }
+      else if (k === 'DEL') { expr.value = expr.value.slice(0, -1); }
+      else { expr.value += k; }
+      expr.focus();
+    });
+  }
+  // Currency converter: recalculate live as the amount or currencies change, not just on submit.
+  if (kind === 'currency' && $('amount')) {
+    var liveCurrency = debounce(function () { handlers.currency(); }, 300);
+    $('amount').addEventListener('input', liveCurrency);
+    $('from').addEventListener('change', function () { handlers.currency(); });
+    $('to').addEventListener('change', function () { handlers.currency(); });
+  }
+
+  // Currency converter: swap the two currencies.
+  var swapBtn = $('swap');
+  if (swapBtn) {
+    swapBtn.addEventListener('click', function () {
+      var from = $('from'), to = $('to');
+      var t = from.value; from.value = to.value; to.value = t;
+      if (handlers[kind]) { handlers[kind](); }
+    });
+  }
+
+  // Scientific calculator: toggle between simple and scientific keypads.
+  var sciToggle = $('sciToggle');
+  if (sciToggle) {
+    sciToggle.addEventListener('click', function () {
+      var on = sciToggle.getAttribute('aria-pressed') !== 'true';
+      sciToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+      sciToggle.textContent = on ? 'Simple' : 'Scientific';
+      var keysEl = document.querySelector('.keys');
+      if (keysEl) { keysEl.classList.toggle('sci', on); }
+    });
+  }
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (handlers[kind]) { handlers[kind](); }
   });
-  form.addEventListener('reset', function () { res.hidden = true; res.innerHTML = ''; setTimeout(sync, 0); });
-  form.addEventListener('change', function (e) { if (e.target.id === 'unit' || e.target.id === 'sex') { sync(); } });
+  form.addEventListener('reset', function () {
+    res.hidden = true;
+    res.innerHTML = '';
+    if (kind === 'currency') { setTimeout(function () { handlers.currency(); }, 0); }
+    setTimeout(sync, 0);
+  });
+  form.addEventListener('change', function (e) { if (e.target.id === 'unit' || e.target.id === 'sex' || e.target.id === 'mode') { sync(); } });
   sync();
+  if (kind === 'currency' && handlers.currency) { handlers.currency(); }
 })(typeof window !== 'undefined' ? window : globalThis);

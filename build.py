@@ -15,6 +15,7 @@ Consent: put your consent tool's <head> script in  consent_head.html. It loads b
 import argparse
 import datetime
 import glob
+import hashlib
 import html
 import importlib.util
 import json
@@ -39,6 +40,42 @@ NICHES = [
 <p>These tools give estimates for healthy adults. They cannot diagnose or treat any condition. For personal medical advice, talk to a qualified healthcare professional.</p>""",
      # Shown near the bottom of every calculator page in this niche
      "disclaimer": '<strong>Not medical advice.</strong> This calculator gives general estimates for adults and is not a substitute for professional advice. Speak to a doctor or registered dietitian before making significant changes to your diet or exercise, especially if you have a medical condition or are pregnant. <a href="/medical-disclaimer/">Read the full disclaimer</a>.'},
+    {"slug": "money", "name": "Money", "icon": "💰",
+     "tagline": "Free money calculators",
+     "tile": "Percentages, tips and everyday money maths, explained in plain English.",
+     "lead": "Simple, private calculators for percentages, tips and everyday money questions. Every result comes with a plain-English explanation of how it was worked out.",
+     "desc": "Free percentage and tip calculators with clear, worked explanations.",
+     "about": """<h2>How these calculators work</h2>
+<p>Each tool uses a standard, widely taught formula. Every page explains the formula and walks through how the result was worked out.</p>
+<p>Everything is calculated in your browser. The numbers you type in are not sent to our servers or stored.</p>""",
+     "disclaimer": '<strong>Estimates only.</strong> These calculators are for everyday convenience and are not financial advice. For anything involving contracts, tax or significant amounts of money, check the figures yourself or ask a qualified professional.'},
+    {"slug": "time", "name": "Time & Dates", "icon": "📅",
+     "tagline": "Free date and age calculators",
+     "tile": "Age, birthdays and the time between any two dates.",
+     "lead": "Simple, private calculators for ages, birthdays and the time between dates. Every result comes with a plain-English explanation of how it was worked out.",
+     "desc": "Free age calculator and days-between-dates calculator with clear explanations of the maths.",
+     "about": """<h2>How these calculators work</h2>
+<p>Dates are counted using calendar-accurate day arithmetic, so month lengths and leap years are handled correctly rather than assumed to be a fixed number of days.</p>
+<p>Everything is calculated in your browser. The dates you enter are not sent to our servers or stored.</p>""",
+     "disclaimer": '<strong>Estimates only.</strong> These calculators use calendar maths and should match any other correctly built date calculator, but always double-check dates that matter legally (visas, contracts, eligibility cut-offs) against an official source.'},
+    {"slug": "home", "name": "Home & Utilities", "icon": "🏠",
+     "tagline": "Free home & utility calculators",
+     "tile": "Work out what your appliances actually cost to run.",
+     "lead": "Simple, private calculators for household running costs. Every result comes with a plain-English explanation of how it was worked out.",
+     "desc": "Free electricity cost calculator with clear explanations of the maths.",
+     "about": """<h2>How these calculators work</h2>
+<p>Each tool uses a standard formula that any electrician or energy supplier would recognise. Every page explains the formula and its limits.</p>
+<p>Everything is calculated in your browser. The numbers you type in are not sent to our servers or stored.</p>""",
+     "disclaimer": '<strong>Estimates only.</strong> Actual running costs depend on your appliance\'s real power draw and your exact tariff. Check your utility bill or supplier for exact rates, and your appliance\'s rating label or plug for exact wattage.'},
+    {"slug": "math", "name": "Math", "icon": "🧮",
+     "tagline": "Free math calculators",
+     "tile": "A scientific calculator for everyday and scientific maths, right in your browser.",
+     "lead": "Simple, private calculators for scientific and everyday maths. Every result comes with a plain-English explanation of how it was worked out.",
+     "desc": "Free scientific calculator with trigonometry, logarithms, powers, roots and factorials.",
+     "about": """<h2>How these calculators work</h2>
+<p>Expressions are parsed and evaluated by a small calculator engine built for this site, following standard order of operations (PEMDAS).</p>
+<p>Everything is calculated in your browser. The numbers you type in are not sent to our servers or stored.</p>""",
+     "disclaimer": '<strong>Estimates only.</strong> Double-check results for anything where precision matters, such as coursework, exams or professional calculations.'},
 ]
 NICHE_BY_SLUG = {n["slug"]: n for n in NICHES}
 
@@ -73,6 +110,19 @@ def read_optional(name):
 ADS_HEAD = read_optional("ads_head.html")
 AD_UNIT = read_optional("ad_unit.html")
 CONSENT_HEAD = read_optional("consent_head.html")
+
+# Cache-busting version for /assets/*: a short hash of every static file's contents. /assets/*
+# is served with a year-long "immutable" Cache-Control (see main()), so without this, browsers
+# would keep serving stale CSS/JS for up to a year after every deploy.
+def _asset_version():
+    h = hashlib.sha1()
+    for p in sorted(glob.glob(os.path.join(ROOT, "static", "*"))):
+        with open(p, "rb") as f:
+            h.update(f.read())
+    return h.hexdigest()[:10]
+
+
+ASSET_VER = _asset_version()
 
 MISSING = []
 
@@ -117,15 +167,15 @@ def layout(*, title, desc, path, body, calc=None, schema=None, noindex=False):
     url = f"{DOMAIN}{path}"
     full_title = title if path == "/" else f"{title} | {NAME}"
     calc_attr = f' data-calc="{calc}"' if calc else ""
-    scripts = '<script src="/assets/calc.js" defer></script>' if calc else ""
+    scripts = f'<script src="/assets/calc.js?v={ASSET_VER}" defer></script>' if calc else ""
+    scripts += f'<script src="/assets/search.js?v={ASSET_VER}" defer></script>'
     if CONSENT_HEAD:
-        scripts += '<script src="/assets/consent.js" defer></script>'
+        scripts += f'<script src="/assets/consent.js?v={ASSET_VER}" defer></script>'
     ld = f'<script type="application/ld+json">{json.dumps(schema)}</script>' if schema else ""
     robots = '<meta name="robots" content="noindex">' if noindex else ""
     # Google requires a link titled "Privacy and cookie settings" so visitors can change or withdraw consent.
     privacy_link = ('<a href="/privacy-policy/#consent" data-privacy-settings>Privacy and cookie settings</a>'
                     if CONSENT_HEAD else "")
-    niche_nav = "".join(f'<a href="/{n["slug"]}/">{e(n["name"])}</a>' for n in NICHES)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -141,8 +191,11 @@ def layout(*, title, desc, path, body, calc=None, schema=None, noindex=False):
 <meta property="og:url" content="{url}">
 <meta property="og:site_name" content="{e(NAME)}">
 <meta name="theme-color" content="#0f766e">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/style.css">
+<link rel="icon" href="/assets/favicon.svg?v={ASSET_VER}" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v={ASSET_VER}">
 {CONSENT_HEAD}
 {ADS_HEAD}
 {ld}
@@ -150,7 +203,11 @@ def layout(*, title, desc, path, body, calc=None, schema=None, noindex=False):
 <body{calc_attr}>
 <header class="site"><div class="wrap">
 <a class="logo" href="/">{e(NAME)}</a>
-<nav class="top" aria-label="Main">{niche_nav}<a href="/about/">About</a></nav>
+<div class="search" role="search">
+<input type="search" id="site-search" placeholder="Search calculators…" aria-label="Search calculators" autocomplete="off">
+<ul id="search-results" class="search-results" hidden></ul>
+</div>
+<nav class="top" aria-label="Main"><a href="/about/">About</a></nav>
 </div></header>
 <main><div class="wrap">
 {body}
@@ -218,13 +275,9 @@ def build_home():
         for n in NICHES
     )
     body = f"""
-<h1>{e(NAME)}: free calculators and tools</h1>
-<p class="lead">Simple, private tools with plain-English explanations of how each result was worked out and what it means.</p>
+<div class="hero"><h1>{e(NAME)}</h1><p class="tagline">Everything for everything</p><p class="ads-note">We put ads on the website to keep it free!</p></div>
 <div class="tiles">{tiles}</div>
-<article class="prose">
-<h2>Everything is calculated in your browser</h2>
-<p>The numbers you type in are not sent to our servers or stored.</p>
-</article>
+<p class="browser-note">Everything is calculated in your browser. The numbers you type in are not sent to our servers or stored.</p>
 """
     schema = {"@context": "https://schema.org", "@type": "WebSite", "name": NAME, "url": DOMAIN + "/"}
     write("/", layout(title=f"{NAME}: Free Calculators and Tools",
@@ -273,8 +326,18 @@ def main():
     # Order calculators as listed in ORDER for the homepage
     order = ["bmi-calculator", "calorie-calculator", "macro-calculator", "body-fat-calculator",
              "ideal-weight-calculator", "water-intake-calculator", "pregnancy-due-date-calculator",
-             "heart-rate-zones-calculator"]
+             "heart-rate-zones-calculator", "percentage-calculator", "tip-calculator",
+             "currency-converter", "age-calculator", "date-calculator", "electricity-cost-calculator",
+             "scientific-calculator"]
     pages.sort(key=lambda p: order.index(p["slug"]) if p["slug"] in order else 99)
+
+    # Search index for the header search box: one entry per calculator.
+    search_index = [
+        {"title": p["nav"], "url": f"/{p['niche']}/{p['slug']}/", "desc": p["tile"], "icon": p.get("icon", "")}
+        for p in pages if p["kind"] == "calc"
+    ]
+    with open(os.path.join(OUT, "assets", "search-index.json"), "w", encoding="utf-8") as f:
+        json.dump(search_index, f, ensure_ascii=False)
 
     build_home()
     for niche in NICHES:
