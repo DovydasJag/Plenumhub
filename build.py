@@ -190,7 +190,8 @@ def layout(*, title, desc, path, body, calc=None, schema=None, noindex=False):
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{url}">
 <meta property="og:site_name" content="{e(NAME)}">
-<meta name="theme-color" content="#0f766e">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161d26" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/assets/favicon.svg?v={ASSET_VER}" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
