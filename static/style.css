@@ -54,6 +54,7 @@ h3{font-size:1.1rem;margin:1.5em 0 .4em}
 label,.lbl{font-size:.88rem;font-weight:600;color:var(--muted)}
 input,select{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 12px;width:100%;min-height:44px}
 input:focus,select:focus,.btn:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 45%,transparent);outline-offset:1px;border-color:var(--brand)}
+input[type="range"]{accent-color:var(--brand);cursor:pointer}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 form[data-unit="metric"] .u-imperial,form[data-unit="imperial"] .u-metric{display:none}
 .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}

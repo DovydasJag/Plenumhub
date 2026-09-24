@@ -154,6 +154,18 @@
       };
     },
 
+    // Distances in one unit (km or mi); efficiency in that unit per kWh; fuelUsed = litres or gallons
+    evCharging: function (distance, efficiency, pricePerKwh, lossPct, chargerKw, batteryKwh, fuelUsed, fuelPrice) {
+      var kwhWheel = distance / efficiency;
+      var kwhWall = kwhWheel / (1 - lossPct / 100);
+      var evCost = kwhWall * pricePerKwh, gasCost = fuelUsed * fuelPrice;
+      return {
+        kwhWheel: kwhWheel, kwhWall: kwhWall, evCost: evCost, gasCost: gasCost, savings: gasCost - evCost,
+        evPerDist: evCost / distance, gasPerDist: gasCost / distance,
+        chargeHours: batteryKwh / (chargerKw * (1 - lossPct / 100))
+      };
+    },
+
     convert: function (amount, rate) { return amount * rate; },
 
     factorial: function (n) {
@@ -574,6 +586,37 @@
         '<p class="note">kWh = (watts &divide; 1000) &times; hours used. Cost = kWh &times; your price per kWh.</p>');
     },
 
+    evcharging: function () {
+      var imp = imperial(), du = imp ? 'mi' : 'km', car = imp ? 'Gas' : 'Petrol';
+      var dist = num(imp ? 'dist_mi' : 'dist_km'), eff = num(imp ? 'eff_mi' : 'eff_km');
+      var rate = num('rate'), loss = num('loss'), kw = parseFloat($('charger').value), battery = num('battery');
+      var carEff = num(imp ? 'mpg' : 'l100'), fuelPrice = num(imp ? 'fuel_gal' : 'fuel_l');
+      if (bad(dist)) { return err('Please enter the distance you drive per month.'); }
+      if (bad(eff)) { return err('Please enter your EV\'s efficiency in ' + du + '/kWh.'); }
+      if (eff > 10) { return err('That efficiency looks too high. Most EVs manage 2-5 mi/kWh (3-8 km/kWh).'); }
+      if (isNaN(rate) || rate < 0) { return err('Please enter a price per kWh of 0 or more.'); }
+      if (bad(battery)) { return err('Please enter your battery size in kWh.'); }
+      if (bad(carEff)) { return err(imp ? 'Please enter the gas car\'s fuel economy in mpg.' : 'Please enter the petrol car\'s fuel use in L/100 km.'); }
+      if (isNaN(fuelPrice) || fuelPrice < 0) { return err(imp ? 'Please enter a gas price per gallon of 0 or more.' : 'Please enter a petrol price per litre of 0 or more.'); }
+      if (isNaN(loss) || loss < 0 || loss > 30) { loss = 12; }
+      var fuelUsed = imp ? dist / carEff : (dist * carEff) / 100;
+      var r = Calc.evCharging(dist, eff, rate, loss, kw, battery, fuelUsed, fuelPrice);
+      var h = Math.floor(r.chargeHours), m = Math.round((r.chargeHours - h) * 60);
+      if (m === 60) { h++; m = 0; }
+      var saveNote = r.savings >= 0 ? fmt(r.savings * 12, 2) + ' per year' : 'The ' + car.toLowerCase() + ' car is cheaper at these prices';
+      out('<div class="stats">' + stat('Home charging per month', fmt(r.evCost, 2), fmt(r.kwhWall, 1) + ' kWh from the wall') +
+        stat(car + ' car per month', fmt(r.gasCost, 2), fmt(fuelUsed, 1) + (imp ? ' gallons' : ' litres')) +
+        stat(r.savings >= 0 ? 'You save per month' : 'Extra cost per month', fmt(Math.abs(r.savings), 2), saveNote) +
+        stat('Full charge (empty to 100%)', h + ' h ' + m + ' min', 'At ' + fmt(kw, 1) + ' kW with ' + fmt(loss, 0) + '% loss') + '</div>' +
+        '<div class="tablewrap"><table><tbody>' +
+        '<tr><td>Energy used at the wheel</td><td>' + fmt(r.kwhWheel, 1) + ' kWh</td></tr>' +
+        '<tr><td>Energy drawn from the wall</td><td>' + fmt(r.kwhWall, 1) + ' kWh</td></tr>' +
+        '<tr><td>Electric cost per ' + du + '</td><td>' + fmt(r.evPerDist, 3) + '</td></tr>' +
+        '<tr><td>' + car + ' cost per ' + du + '</td><td>' + fmt(r.gasPerDist, 3) + '</td></tr>' +
+        '</tbody></table></div>' +
+        '<p class="note">kWh from the wall = (distance &divide; efficiency) &divide; (1 &minus; ' + fmt(loss, 0) + '% loss). Cost = kWh &times; your price per kWh. Real-world efficiency drops in cold weather and at high speed.</p>');
+    },
+
     scientific: function () {
       var exprEl = $('expr'), expr = exprEl ? exprEl.value : '';
       var v;
@@ -627,6 +670,11 @@
 
   var sync = function () {
     form.setAttribute('data-unit', unit());
+    var range = document.querySelectorAll('input[type="range"]');
+    for (var ri = 0; ri < range.length; ri++) {
+      var o = $(range[ri].id + '_out');
+      if (o) { o.textContent = range[ri].value; }
+    }
     var fem = document.querySelectorAll('.only-female');
     for (var i = 0; i < fem.length; i++) { fem[i].hidden = sexVal() !== 'female'; }
     var modeSel = $('mode');
@@ -703,6 +751,7 @@
     if (kind === 'currency') { setTimeout(function () { handlers.currency(); }, 0); }
     setTimeout(sync, 0);
   });
+  form.addEventListener('input', function (e) { if (e.target.type === 'range') { sync(); } });
   form.addEventListener('change', function (e) { if (e.target.id === 'unit' || e.target.id === 'sex' || e.target.id === 'mode') { sync(); } });
   sync();
   if (kind === 'currency' && handlers.currency) { handlers.currency(); }

@@ -153,6 +153,22 @@ test('electricity: yearly figure uses 365 days regardless of daysPerMonth', () =
   assert.equal(Math.round(r.costYear * 100) / 100, 73);
 });
 
+test('evCharging: 1000 mi at 3.5 mi/kWh, $0.18/kWh, 12% loss vs 30 mpg at $3.50', () => {
+  const r = Calc.evCharging(1000, 3.5, 0.18, 12, 7.2, 75, 1000 / 30, 3.5);
+  assert.equal(Math.round(r.kwhWheel * 10) / 10, 285.7);
+  assert.equal(Math.round(r.kwhWall * 10) / 10, 324.7);
+  assert.equal(Math.round(r.evCost * 100) / 100, 58.44);
+  assert.equal(Math.round(r.gasCost * 100) / 100, 116.67);
+  assert.equal(Math.round(r.savings * 100) / 100, 58.23);
+  assert.equal(Math.round(r.chargeHours * 10) / 10, 11.8);
+});
+test('evCharging: zero loss means wall energy equals wheel energy', () => {
+  const r = Calc.evCharging(100, 4, 0.2, 0, 10, 50, 0, 0);
+  assert.equal(r.kwhWall, 25);
+  assert.equal(r.evCost, 5);
+  assert.equal(r.chargeHours, 5);
+});
+
 test('convert: basic and edge cases', () => {
   assert.equal(Calc.convert(50, 0.92), 46);
   assert.equal(Calc.convert(0, 1.5), 0);
