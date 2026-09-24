@@ -166,6 +166,91 @@
       };
     },
 
+    // Litres (metric, economy in L/100 km) or US gallons (imperial, economy in mpg)
+    fuelUsed: function (distance, economy, imperial) {
+      return imperial ? distance / economy : (distance * economy) / 100;
+    },
+
+    // One fuel economy figure in any of the four units, returned in all four
+    fuelEconomy: function (value, from) {
+      var KM_PER_MI = 1.609344, L_US = 3.785411784, L_UK = 4.54609;
+      var kml = from === 'kml' ? value : from === 'l100' ? 100 / value
+        : (value * KM_PER_MI) / (from === 'mpg_uk' ? L_UK : L_US);
+      return { kml: kml, l100: 100 / kml, mpg_us: (kml * L_US) / KM_PER_MI, mpg_uk: (kml * L_UK) / KM_PER_MI };
+    },
+
+    // Standard amortized loan, with a year-by-year summary
+    loan: function (principal, aprPct, months) {
+      var r = aprPct / 1200;
+      var pay = r === 0 ? principal / months : (principal * r) / (1 - Math.pow(1 + r, -months));
+      var bal = principal, years = [], y = null;
+      for (var m = 0; m < months; m++) {
+        var interest = bal * r, prin = pay - interest;
+        bal -= prin;
+        if (m % 12 === 0) { y = { year: years.length + 1, interest: 0, principal: 0, balance: 0 }; years.push(y); }
+        y.interest += interest; y.principal += prin; y.balance = Math.max(0, bal);
+      }
+      return { payment: pay, total: pay * months, interest: pay * months - principal, years: years };
+    },
+
+    // Pre-tax lease payment: depreciation fee + finance fee (money factor = APR / 2400)
+    lease: function (price, residualPct, moneyFactor, months) {
+      var residual = (price * residualPct) / 100;
+      var dep = (price - residual) / months, fin = (price + residual) * moneyFactor;
+      return { residual: residual, depreciation: dep, finance: fin, payment: dep + fin, total: (dep + fin) * months };
+    },
+
+    // parts: [[label, monthly amount], ...]
+    costPerDistance: function (monthlyDistance, parts) {
+      var total = 0;
+      for (var i = 0; i < parts.length; i++) { total += parts[i][1]; }
+      return {
+        monthly: total, annual: total * 12, perDist: total / monthlyDistance,
+        parts: parts.map(function (p) { return { label: p[0], monthly: p[1], perDist: p[1] / monthlyDistance, share: total ? (p[1] / total) * 100 : 0 }; })
+      };
+    },
+
+    // Declining-balance depreciation: firstPct in year 1, laterPct each year after
+    depreciation: function (price, firstPct, laterPct, years) {
+      var v = price, rows = [];
+      for (var y = 1; y <= years; y++) {
+        var lost = v * (y === 1 ? firstPct : laterPct) / 100;
+        rows.push({ year: y, start: v, lost: lost, end: v - lost });
+        v -= lost;
+      }
+      return { rows: rows, value: v, lost: price - v, lostPct: ((price - v) / price) * 100 };
+    },
+
+    evVsGas: function (distance, evEff, pricePerKwh, evMaint, gasEconomy, fuelPrice, gasMaint, imperial) {
+      var kwh = distance / evEff, fuel = Calc.fuelUsed(distance, gasEconomy, imperial);
+      var ev = kwh * pricePerKwh + evMaint, gas = fuel * fuelPrice + gasMaint;
+      return { kwh: kwh, evEnergy: kwh * pricePerKwh, ev: ev, fuel: fuel, gasFuel: fuel * fuelPrice, gas: gas, diff: gas - ev };
+    },
+
+    roadTrip: function (legs, economy, fuelPrice, imperial) {
+      var total = { distance: 0, fuel: 0, cost: 0 };
+      var rows = legs.map(function (d) {
+        var f = Calc.fuelUsed(d, economy, imperial), c = f * fuelPrice;
+        total.distance += d; total.fuel += f; total.cost += c;
+        return { distance: d, fuel: f, cost: c };
+      });
+      return { legs: rows, distance: total.distance, fuel: total.fuel, cost: total.cost };
+    },
+
+    // "225/45R17", "P225/45 R17", "LT265/70R17", "225/45ZR17" -> {w, a, r} or null
+    tireParse: function (s) {
+      var m = /^\s*(?:P|LT|ST)?\s*(\d{3})\s*\/\s*(\d{2,3})\s*[A-Z]{0,2}\s*-?\s*(\d{2}(?:\.\d)?)(?:\s+\d{2,3}(?:\/\d{2,3})?[A-Z]{1,2})?\s*$/i.exec(String(s));
+      return m ? { w: +m[1], a: +m[2], r: +m[3] } : null;
+    },
+
+    // Overall diameter in mm: two sidewalls plus the wheel
+    tireDiameter: function (t) { return (2 * t.w * t.a) / 100 + t.r * 25.4; },
+
+    tireCompare: function (stock, fitted) {
+      var d1 = Calc.tireDiameter(stock), d2 = Calc.tireDiameter(fitted);
+      return { stockDia: d1, newDia: d2, ratio: d2 / d1, errorPct: (d2 / d1 - 1) * 100 };
+    },
+
     convert: function (amount, rate) { return amount * rate; },
 
     factorial: function (n) {
@@ -372,6 +457,8 @@
       t = setTimeout(function () { fn.apply(null, args); }, ms);
     };
   };
+
+  var ecoSource = null; // fuel economy converter: the box the visitor last typed in
 
   var handlers = {
     bmi: function () {
@@ -617,6 +704,178 @@
         '<p class="note">kWh from the wall = (distance &divide; efficiency) &divide; (1 &minus; ' + fmt(loss, 0) + '% loss). Cost = kWh &times; your price per kWh. Real-world efficiency drops in cold weather and at high speed.</p>');
     },
 
+    fueltrip: function () {
+      var imp = imperial(), du = imp ? 'mi' : 'km';
+      var dist = num(imp ? 'dist_mi' : 'dist_km'), eco = num(imp ? 'mpg' : 'l100'), price = num(imp ? 'fuel_gal' : 'fuel_l');
+      if (bad(dist)) { return err('Please enter the trip distance.'); }
+      if (bad(eco)) { return err(imp ? 'Please enter your fuel economy in mpg.' : 'Please enter your fuel use in L/100 km.'); }
+      if (isNaN(price) || price < 0) { return err('Please enter a fuel price of 0 or more.'); }
+      var fuel = Calc.fuelUsed(dist, eco, imp), cost = fuel * price;
+      out('<div class="stats">' + stat('Trip fuel cost', fmt(cost, 2), 'For ' + fmt(dist, 0) + ' ' + du) +
+        stat('Fuel used', fmt(fuel, 1) + (imp ? ' gallons' : ' litres'), fmt(cost / dist, 3) + ' per ' + du) + '</div>' +
+        '<p class="note">' + (imp ? 'Fuel = ' + fmt(dist, 0) + ' mi &divide; ' + fmt(eco, 1) + ' mpg'
+          : 'Fuel = ' + fmt(dist, 0) + ' km &times; ' + fmt(eco, 1) + ' L/100 km &divide; 100') +
+        ' = ' + fmt(fuel, 2) + (imp ? ' gal' : ' L') + '. Cost = fuel &times; ' + fmt(price, 2) + ' = ' + fmt(cost, 2) + '. Double it for a return trip.</p>');
+    },
+
+    mpgconvert: function () {
+      var ids = ['mpg_us', 'mpg_uk', 'l100', 'kml'];
+      var from = ecoSource || ids.filter(function (id) { return !isNaN(num(id)); })[0];
+      if (!from) { return err('Please enter a fuel economy figure in any one box.'); }
+      var v = num(from);
+      if (isNaN(v)) {
+        ids.forEach(function (id) { if (id !== from) { $(id).value = ''; } });
+        res.hidden = true; res.innerHTML = '';
+        return;
+      }
+      if (v <= 0) { return err('Please enter a number greater than 0.'); }
+      var r = Calc.fuelEconomy(v, from);
+      ids.forEach(function (id) { if (id !== from) { $(id).value = String(Math.round(r[id] * 100) / 100); } });
+      out('<p class="note">1 US gallon = 3.785 litres, 1 UK gallon = 4.546 litres, 1 mile = 1.609 km. L/100 km = 235.21 &divide; mpg (US) = 282.48 &divide; mpg (UK), and km/L = 100 &divide; L/100 km. Lower L/100 km means better economy; higher mpg or km/L means better economy.</p>');
+    },
+
+    carloan: function () {
+      var p = num('amount'), apr = num('apr'), n = num('term');
+      if (bad(p)) { return err('Please enter the loan amount.'); }
+      if (isNaN(apr) || apr < 0 || apr > 50) { return err('Please enter an APR between 0 and 50%.'); }
+      if (bad(n) || n > 120) { return err('Please enter a loan term between 1 and 120 months.'); }
+      n = Math.round(n);
+      var r = Calc.loan(p, apr, n);
+      var rows = r.years.map(function (y) {
+        return '<tr><td>Year ' + y.year + '</td><td>' + fmt(y.principal, 2) + '</td><td>' + fmt(y.interest, 2) + '</td><td>' + fmt(y.balance, 2) + '</td></tr>';
+      }).join('');
+      out('<div class="stats">' + stat('Monthly payment', fmt(r.payment, 2), n + ' payments') +
+        stat('Total interest', fmt(r.interest, 2), fmt((r.interest / p) * 100, 1) + '% of the amount borrowed') +
+        stat('Total repaid', fmt(r.total, 2), 'Loan plus interest') + '</div>' +
+        '<div class="tablewrap"><table><thead><tr><th>Year</th><th>Principal paid</th><th>Interest paid</th><th>Balance left</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="note">Payment = P &times; r &divide; (1 &minus; (1 + r)<sup>&minus;n</sup>), where P is the loan, r is the APR &divide; 12 &divide; 100 and n is the number of months. Excludes fees, taxes and add-ons unless you include them in the loan amount.</p>');
+    },
+
+    carlease: function () {
+      var price = num('price'), resPct = num('residual'), n = num('term'), mode = $('mode').value;
+      var mf = mode === 'apr' ? num('lease_apr') / 2400 : num('mf');
+      if (bad(price)) { return err('Please enter the vehicle price.'); }
+      if (bad(resPct) || resPct >= 100) { return err('Please enter a residual value between 1% and 99%.'); }
+      if (isNaN(mf) || mf < 0) { return err(mode === 'apr' ? 'Please enter an APR of 0 or more.' : 'Please enter a money factor of 0 or more.'); }
+      if (mf > 0.02) { return err('That money factor looks too high. Money factors are small decimals such as 0.00250 (about 6% APR).'); }
+      if (bad(n) || n > 96) { return err('Please enter a lease term between 1 and 96 months.'); }
+      n = Math.round(n);
+      var r = Calc.lease(price, resPct, mf, n);
+      out('<div class="stats">' + stat('Monthly payment (before tax)', fmt(r.payment, 2), n + ' payments') +
+        stat('Depreciation portion', fmt(r.depreciation, 2), 'Per month') +
+        stat('Finance fee portion', fmt(r.finance, 2), 'Per month') + '</div>' +
+        '<div class="tablewrap"><table><tbody>' +
+        '<tr><td>Residual value at lease end</td><td>' + fmt(r.residual, 2) + '</td></tr>' +
+        '<tr><td>Money factor (APR equivalent)</td><td>' + mf.toFixed(5) + ' (' + fmt(mf * 2400, 2) + '%)</td></tr>' +
+        '<tr><td>Total of monthly payments</td><td>' + fmt(r.total, 2) + '</td></tr>' +
+        '</tbody></table></div>' +
+        '<p class="note">Depreciation = (price &minus; residual) &divide; months. Finance fee = (price + residual) &times; money factor. Sales tax, fees and any down payment are not included.</p>');
+    },
+
+    costpermile: function () {
+      var imp = imperial(), du = imp ? 'mi' : 'km', mode = $('mode').value;
+      var dist = num(imp ? 'dist_mi' : 'dist_km');
+      var fuel = num('fuel'), ins = num('insurance'), maint = num('maint');
+      var own = mode === 'depr' ? num('depr') / 12 : num('payment');
+      if (bad(dist)) { return err('Please enter the distance you drive per month.'); }
+      var vals = [fuel, ins, maint, own];
+      for (var i = 0; i < vals.length; i++) { if (isNaN(vals[i]) || vals[i] < 0) { return err('Please fill in every cost (enter 0 for any that don\'t apply).'); } }
+      var r = Calc.costPerDistance(dist, [['Fuel or charging', fuel], ['Insurance', ins], ['Maintenance', maint],
+        [mode === 'depr' ? 'Depreciation' : 'Loan or lease payment', own]]);
+      var rows = r.parts.map(function (p) {
+        return '<tr><td>' + p.label + '</td><td>' + fmt(p.monthly, 2) + '</td><td>' + fmt(p.perDist, 3) + '</td><td>' + fmt(p.share, 0) + '%</td></tr>';
+      }).join('');
+      out('<div class="stats">' + stat('Cost per ' + du, fmt(r.perDist, 3), 'All costs combined') +
+        stat('Total per month', fmt(r.monthly, 2), fmt(dist, 0) + ' ' + du + ' a month') +
+        stat('Total per year', fmt(r.annual, 2)) + '</div>' +
+        '<div class="tablewrap"><table><thead><tr><th>Cost</th><th>Per month</th><th>Per ' + du + '</th><th>Share</th></tr></thead><tbody>' + rows +
+        '<tr class="hl"><td>Total</td><td>' + fmt(r.monthly, 2) + '</td><td>' + fmt(r.perDist, 3) + '</td><td>100%</td></tr></tbody></table></div>' +
+        '<p class="note">Cost per ' + du + ' = total monthly cost &divide; ' + du + ' driven per month.' + (mode === 'depr' ? ' Depreciation per year is divided by 12.' : '') + ' Parking, tolls, tax and registration are not included unless you add them to one of the costs.</p>');
+    },
+
+    depreciation: function () {
+      var price = num('price'), first = num('first'), later = num('later'), years = num('years');
+      if (bad(price)) { return err('Please enter the purchase price.'); }
+      if (isNaN(first) || first < 0 || first >= 100 || isNaN(later) || later < 0 || later >= 100) { return err('Please enter depreciation rates between 0% and 99%.'); }
+      if (bad(years) || years > 25) { return err('Please enter between 1 and 25 years.'); }
+      years = Math.round(years);
+      var r = Calc.depreciation(price, first, later, years);
+      var rows = r.rows.map(function (y) {
+        return '<tr' + (y.year === years ? ' class="hl"' : '') + '><td>Year ' + y.year + '</td><td>' + fmt(y.lost, 2) + '</td><td>' + fmt(y.end, 2) + '</td><td>' + fmt((y.end / price) * 100, 0) + '%</td></tr>';
+      }).join('');
+      out('<div class="stats">' + stat('Estimated value after ' + years + (years === 1 ? ' year' : ' years'), fmt(r.value, 2), fmt((r.value / price) * 100, 0) + '% of the purchase price') +
+        stat('Total value lost', fmt(r.lost, 2), fmt(r.lostPct, 1) + '% of the purchase price') + '</div>' +
+        '<div class="tablewrap"><table><thead><tr><th>Year</th><th>Value lost</th><th>Value at year end</th><th>% of price</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="note">Each year the car loses a percentage of its value at the start of that year: ' + fmt(first, 0) + '% in year 1, then ' + fmt(later, 0) + '% a year. Real values depend on make, mileage, condition and the market.</p>');
+    },
+
+    evvsgas: function () {
+      var imp = imperial(), du = imp ? 'mi' : 'km', car = imp ? 'Gas' : 'Petrol';
+      var dist = num(imp ? 'dist_mi' : 'dist_km'), eff = num(imp ? 'eff_mi' : 'eff_km'), rate = num('rate');
+      var eco = num(imp ? 'mpg' : 'l100'), price = num(imp ? 'fuel_gal' : 'fuel_l');
+      var evM = num('ev_maint'), gasM = num('gas_maint');
+      if (bad(dist)) { return err('Please enter the distance you drive per month.'); }
+      if (bad(eff)) { return err('Please enter the EV\'s efficiency in ' + du + '/kWh.'); }
+      if (eff > 10) { return err('That efficiency looks too high. Most EVs manage 2-5 mi/kWh (3-8 km/kWh).'); }
+      if (isNaN(rate) || rate < 0) { return err('Please enter a price per kWh of 0 or more.'); }
+      if (bad(eco)) { return err(imp ? 'Please enter the gas car\'s fuel economy in mpg.' : 'Please enter the petrol car\'s fuel use in L/100 km.'); }
+      if (isNaN(price) || price < 0) { return err('Please enter a fuel price of 0 or more.'); }
+      if (isNaN(evM) || evM < 0 || isNaN(gasM) || gasM < 0) { return err('Please enter a monthly maintenance estimate for each car (0 or more).'); }
+      var r = Calc.evVsGas(dist, eff, rate, evM, eco, price, gasM, imp);
+      var cheaper = r.diff > 0 ? 'The EV is cheaper' : r.diff < 0 ? 'The ' + car.toLowerCase() + ' car is cheaper' : 'Both cost the same';
+      out('<div class="stats">' + stat('EV per month', fmt(r.ev, 2), fmt(r.ev * 12, 2) + ' per year') +
+        stat(car + ' car per month', fmt(r.gas, 2), fmt(r.gas * 12, 2) + ' per year') +
+        stat('Difference per month', fmt(Math.abs(r.diff), 2), cheaper + ', ' + fmt(Math.abs(r.diff) * 12, 2) + ' per year') + '</div>' +
+        '<div class="tablewrap"><table><thead><tr><th>Monthly cost</th><th>EV</th><th>' + car + ' car</th></tr></thead><tbody>' +
+        '<tr><td>Energy</td><td>' + fmt(r.evEnergy, 2) + ' (' + fmt(r.kwh, 1) + ' kWh)</td><td>' + fmt(r.gasFuel, 2) + ' (' + fmt(r.fuel, 1) + (imp ? ' gal' : ' L') + ')</td></tr>' +
+        '<tr><td>Maintenance</td><td>' + fmt(evM, 2) + '</td><td>' + fmt(gasM, 2) + '</td></tr>' +
+        '<tr class="hl"><td>Total</td><td>' + fmt(r.ev, 2) + '</td><td>' + fmt(r.gas, 2) + '</td></tr>' +
+        '</tbody></table></div>' +
+        '<p class="note">EV energy = distance &divide; efficiency &times; price per kWh. ' + car + ' fuel = ' + (imp ? 'miles &divide; mpg' : 'km &times; L/100 km &divide; 100') + ' &times; fuel price. Charging losses are not included; the EV Home Charging Cost Calculator adds them.</p>');
+    },
+
+    roadtrip: function () {
+      var imp = imperial(), du = imp ? 'mi' : 'km';
+      var eco = num(imp ? 'mpg' : 'l100'), price = num(imp ? 'fuel_gal' : 'fuel_l');
+      var inputs = document.querySelectorAll('.leg-dist'), legs = [], nums = [];
+      for (var i = 0; i < inputs.length; i++) {
+        var v = inputs[i].value === '' ? NaN : parseFloat(inputs[i].value);
+        if (isNaN(v)) { continue; }
+        if (v <= 0) { return err('Leg ' + (i + 1) + ': please enter a distance greater than 0.'); }
+        legs.push(v); nums.push(i + 1);
+      }
+      if (bad(eco)) { return err(imp ? 'Please enter your fuel economy in mpg.' : 'Please enter your fuel use in L/100 km.'); }
+      if (isNaN(price) || price < 0) { return err('Please enter a fuel price of 0 or more.'); }
+      if (!legs.length) { return err('Please enter the distance of at least one leg.'); }
+      var r = Calc.roadTrip(legs, eco, price, imp), fu = imp ? ' gal' : ' L';
+      var rows = r.legs.map(function (l, k) {
+        return '<tr><td>Leg ' + nums[k] + '</td><td>' + fmt(l.distance, 0) + ' ' + du + '</td><td>' + fmt(l.fuel, 1) + fu + '</td><td>' + fmt(l.cost, 2) + '</td></tr>';
+      }).join('');
+      out('<div class="stats">' + stat('Total trip fuel cost', fmt(r.cost, 2), legs.length + (legs.length === 1 ? ' leg' : ' legs')) +
+        stat('Total distance', fmt(r.distance, 0) + ' ' + du, fmt(r.fuel, 1) + (imp ? ' gallons' : ' litres') + ' of fuel') + '</div>' +
+        '<div class="tablewrap"><table><thead><tr><th>Leg</th><th>Distance</th><th>Fuel</th><th>Cost</th></tr></thead><tbody>' + rows +
+        '<tr class="hl"><td>Total</td><td>' + fmt(r.distance, 0) + ' ' + du + '</td><td>' + fmt(r.fuel, 1) + fu + '</td><td>' + fmt(r.cost, 2) + '</td></tr></tbody></table></div>' +
+        '<p class="note">Each leg: fuel = ' + (imp ? 'miles &divide; mpg' : 'km &times; L/100 km &divide; 100') + ', cost = fuel &times; ' + fmt(price, 2) + '. Empty legs are skipped.</p>');
+    },
+
+    tiresize: function () {
+      var imp = imperial();
+      var a = Calc.tireParse($('stock').value), b = Calc.tireParse($('fitted').value);
+      if (!a) { return err('Please enter the stock tire size in the usual format, for example 225/45R17.'); }
+      if (!b) { return err('Please enter the new tire size in the usual format, for example 245/40R18.'); }
+      var r = Calc.tireCompare(a, b), sp = imp ? 'mph' : 'km/h';
+      var dia = function (mm) { return imp ? fmt(mm / 25.4, 2) + ' in' : fmt(mm, 1) + ' mm'; };
+      var speeds = imp ? [20, 30, 40, 50, 60, 70, 80] : [30, 50, 80, 100, 120, 130];
+      var rows = speeds.map(function (s) { return '<tr><td>' + s + ' ' + sp + '</td><td>' + fmt(s * r.ratio, 1) + ' ' + sp + '</td></tr>'; }).join('');
+      var dir = r.errorPct > 0 ? 'faster than your speedometer shows' : r.errorPct < 0 ? 'slower than your speedometer shows' : 'exactly what your speedometer shows';
+      var warn = Math.abs(r.errorPct) > 3 ? ' <span class="warn">More than 3% is usually considered too big a change; check with a tire fitter.</span>' : '';
+      out('<div class="stats">' + stat('Speedometer error', (r.errorPct > 0 ? '+' : '') + fmt(r.errorPct, 2) + '%', 'You are actually going ' + dir) +
+        stat('Stock diameter', dia(r.stockDia), 'Circumference ' + dia(r.stockDia * Math.PI)) +
+        stat('New diameter', dia(r.newDia), 'Circumference ' + dia(r.newDia * Math.PI)) + '</div>' +
+        '<div class="tablewrap"><table><thead><tr><th>Speedometer shows</th><th>Actual speed</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="note">Diameter = 2 &times; width &times; aspect ratio &divide; 100 + wheel size &times; 25.4 mm. Actual speed = shown speed &times; new diameter &divide; stock diameter. Your odometer is off by the same ' + fmt(Math.abs(r.errorPct), 2) + '%.' + warn + '</p>');
+    },
+
     scientific: function () {
       var exprEl = $('expr'), expr = exprEl ? exprEl.value : '';
       var v;
@@ -717,6 +976,46 @@
     $('amount').addEventListener('input', liveCurrency);
     $('from').addEventListener('change', function () { handlers.currency(); });
     $('to').addEventListener('change', function () { handlers.currency(); });
+  }
+
+  // Fuel economy converter: typing in any box converts into the other three.
+  if (kind === 'mpgconvert') {
+    ['mpg_us', 'mpg_uk', 'l100', 'kml'].forEach(function (id) {
+      $(id).addEventListener('input', function () { ecoSource = id; handlers.mpgconvert(); });
+    });
+    form.addEventListener('reset', function () { ecoSource = null; });
+  }
+
+  // Road trip: add and remove leg rows. Each row keeps a unique id so its label stays linked.
+  var legsWrap = $('legs');
+  if (legsWrap) {
+    var legCount = legsWrap.querySelectorAll('.leg').length;
+    var renumber = function () {
+      var rows = legsWrap.querySelectorAll('.leg');
+      for (var i = 0; i < rows.length; i++) {
+        rows[i].querySelector('.leg-n').textContent = i + 1;
+        var rm = rows[i].querySelector('.leg-remove');
+        rm.setAttribute('aria-label', 'Remove leg ' + (i + 1));
+        rm.hidden = rows.length === 1;
+      }
+    };
+    $('addLeg').addEventListener('click', function () {
+      var rows = legsWrap.querySelectorAll('.leg');
+      var row = rows[rows.length - 1].cloneNode(true), id = 'leg_' + (++legCount);
+      row.querySelector('label').setAttribute('for', id);
+      var input = row.querySelector('input');
+      input.id = id; input.value = '';
+      legsWrap.appendChild(row);
+      renumber();
+      input.focus();
+    });
+    legsWrap.addEventListener('click', function (e) {
+      var rm = e.target.closest ? e.target.closest('.leg-remove') : null;
+      if (!rm || legsWrap.querySelectorAll('.leg').length === 1) { return; }
+      rm.closest('.leg').remove();
+      renumber();
+    });
+    renumber();
   }
 
   // Currency converter: swap the two currencies.

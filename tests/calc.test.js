@@ -169,6 +169,73 @@ test('evCharging: zero loss means wall energy equals wheel energy', () => {
   assert.equal(r.chargeHours, 5);
 });
 
+const r2 = (x) => Math.round(x * 100) / 100;
+
+test('fuelUsed: mpg and L/100 km', () => {
+  assert.equal(Calc.fuelUsed(300, 30, true), 10);
+  assert.equal(Calc.fuelUsed(500, 7, false), 35);
+});
+test('fuelEconomy: 30 US mpg in all units, and round trip', () => {
+  const e = Calc.fuelEconomy(30, 'mpg_us');
+  assert.equal(r2(e.mpg_uk), 36.03);
+  assert.equal(r2(e.l100), 7.84);
+  assert.equal(r2(e.kml), 12.75);
+  assert.equal(r2(Calc.fuelEconomy(e.l100, 'l100').mpg_us), 30);
+});
+test('loan: $30,000 at 6.5% over 60 months', () => {
+  const r = Calc.loan(30000, 6.5, 60);
+  assert.equal(r2(r.payment), 586.98);
+  assert.equal(r2(r.interest), 5219.07);
+  assert.equal(r.years.length, 5);
+  assert.ok(Math.abs(r.years[4].balance) < 0.01);
+});
+test('loan: 0% APR divides evenly', () => {
+  assert.equal(Calc.loan(12000, 0, 48).payment, 250);
+});
+test('lease: $35,000, 58% residual, MF 0.0025, 36 months', () => {
+  const r = Calc.lease(35000, 58, 0.0025, 36);
+  assert.equal(r.residual, 20300);
+  assert.equal(r2(r.depreciation), 408.33);
+  assert.equal(r2(r.finance), 138.25);
+  assert.equal(r2(r.payment), 546.58);
+});
+test('costPerDistance: sums parts and divides by distance', () => {
+  const r = Calc.costPerDistance(1000, [['a', 120], ['b', 150], ['c', 50], ['d', 450]]);
+  assert.equal(r.monthly, 770);
+  assert.equal(r.perDist, 0.77);
+});
+test('depreciation: 20% then 15% over 5 years', () => {
+  const r = Calc.depreciation(35000, 20, 15, 5);
+  assert.equal(r.rows[0].end, 28000);
+  assert.equal(r2(r.value), 14616.18);
+  assert.equal(r2(r.lost), 20383.83);
+});
+test('evVsGas: 1000 mi, 3.5 mi/kWh at 0.18 vs 30 mpg at 3.50', () => {
+  const r = Calc.evVsGas(1000, 3.5, 0.18, 30, 30, 3.5, 60, true);
+  assert.equal(r2(r.ev), 81.43);
+  assert.equal(r2(r.gas), 176.67);
+  assert.equal(r2(r.diff), 95.24);
+});
+test('roadTrip: per-leg and total cost', () => {
+  const r = Calc.roadTrip([120, 250, 180], 28, 3.4, true);
+  assert.deepEqual(r.legs.map((l) => r2(l.cost)), [14.57, 30.36, 21.86]);
+  assert.equal(r.distance, 550);
+  assert.equal(r2(r.cost), 66.79);
+});
+test('tireParse: common formats and junk', () => {
+  assert.deepEqual(Calc.tireParse('225/45R17'), { w: 225, a: 45, r: 17 });
+  assert.deepEqual(Calc.tireParse('P225/45 ZR17 91W'), { w: 225, a: 45, r: 17 });
+  assert.deepEqual(Calc.tireParse('LT265/70R17 121/118S'), { w: 265, a: 70, r: 17 });
+  assert.equal(Calc.tireParse('33x12.50R15'), null);
+  assert.equal(Calc.tireParse('hello'), null);
+});
+test('tireCompare: 225/45R17 to 245/40R18', () => {
+  const r = Calc.tireCompare(Calc.tireParse('225/45R17'), Calc.tireParse('245/40R18'));
+  assert.equal(Math.round(r.stockDia * 10) / 10, 634.3);
+  assert.equal(Math.round(r.newDia * 10) / 10, 653.2);
+  assert.equal(r2(r.errorPct), 2.98);
+});
+
 test('convert: basic and edge cases', () => {
   assert.equal(Calc.convert(50, 0.92), 46);
   assert.equal(Calc.convert(0, 1.5), 0);

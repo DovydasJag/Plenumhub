@@ -82,7 +82,7 @@ NICHES = [
      "tagline": "Free car & EV calculators",
      "tile": "Charging, fuel and running costs for your car, explained in plain English.",
      "lead": "Simple, private calculators for what your car really costs to run. Every result comes with a plain-English explanation of how it was worked out.",
-     "desc": "Free EV home charging cost calculator: compare electric and gas running costs, with clear explanations of the maths.",
+     "desc": "Free car calculators: EV charging and EV vs gas costs, fuel cost per trip, road trip costs, mpg conversion, cost per mile, car loans, leases, depreciation and tire sizes.",
      "about": """<h2>How these calculators work</h2>
 <p>Each tool uses the same basic energy and fuel arithmetic your car's trip computer and your utility bill use. Every page explains the formula, the assumptions behind it, and where real-world results can differ.</p>
 <p>Everything is calculated in your browser. The numbers you type in are not sent to our servers or stored.</p>""",
@@ -340,7 +340,10 @@ def main():
              "ideal-weight-calculator", "water-intake-calculator", "pregnancy-due-date-calculator",
              "heart-rate-zones-calculator", "percentage-calculator", "tip-calculator",
              "currency-converter", "age-calculator", "date-calculator", "electricity-cost-calculator",
-             "scientific-calculator", "ev-charging-cost-calculator"]
+             "scientific-calculator", "ev-charging-cost-calculator", "ev-vs-gas-cost-calculator",
+             "fuel-cost-calculator", "road-trip-cost-calculator", "fuel-economy-converter",
+             "cost-per-mile-calculator", "car-loan-calculator", "car-lease-calculator",
+             "car-depreciation-calculator", "tire-size-calculator"]
     pages.sort(key=lambda p: order.index(p["slug"]) if p["slug"] in order else 99)
 
     # Search index for the header search box: one entry per calculator.

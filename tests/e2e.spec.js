@@ -277,6 +277,49 @@ async function run() {
     assertContains(await page.locator('label[for=loss]').innerText(), '20%', 'slider label');
   });
 
+  await check('Fuel Economy Converter: typing 30 US mpg fills the other three live', async () => {
+    await page.goto(BASE + '/automotive/fuel-economy-converter/');
+    await page.type('#mpg_us', '30');
+    const v = await page.evaluate(() => ['mpg_uk', 'l100', 'kml'].map((id) => document.getElementById(id).value).join(','));
+    if (v !== '36.03,7.84,12.75') { throw new Error('expected 36.03,7.84,12.75, got ' + v); }
+  });
+
+  await check('Car Loan Calculator: $30,000 at 6.5% over 60 months = 586.98/month', async () => {
+    await page.goto(BASE + '/automotive/car-loan-calculator/');
+    await page.fill('#amount', '30000');
+    await page.fill('#apr', '6.5');
+    await page.click('button[type=submit]');
+    const t = await page.locator('#result').innerText();
+    assertContains(t, '586.98', 'monthly payment');
+    assertContains(t, '5,219.07', 'total interest');
+  });
+
+  await check('Road Trip Calculator: add and remove legs, then total three legs', async () => {
+    await page.goto(BASE + '/automotive/road-trip-cost-calculator/');
+    await page.click('#addLeg');
+    await page.locator('.leg-remove').last().click();
+    const n = await page.locator('.leg').count();
+    if (n !== 3) { throw new Error('expected 3 legs after add + remove, got ' + n); }
+    await page.selectOption('#unit', 'imperial');
+    await page.fill('#mpg', '28');
+    await page.fill('#fuel_gal', '3.40');
+    await page.fill('#leg_1', '120');
+    await page.fill('#leg_2', '250');
+    await page.fill('#leg_3', '180');
+    await page.click('button[type=submit]');
+    assertContains(await page.locator('#result').innerText(), '66.79', 'road trip total');
+  });
+
+  await check('Tire Size Calculator: 225/45R17 to 245/40R18 is +2.98%', async () => {
+    await page.goto(BASE + '/automotive/tire-size-calculator/');
+    await page.fill('#stock', '225/45R17');
+    await page.fill('#fitted', '245/40R18');
+    await page.click('button[type=submit]');
+    const t = await page.locator('#result').innerText();
+    assertContains(t, '+2.98%', 'speedometer error');
+    assertContains(t, '103.0 km/h', 'actual speed at 100');
+  });
+
   await browser.close();
   console.log('\n' + (failures === 0 ? 'All Playwright checks passed.' : failures + ' Playwright check(s) FAILED.'));
   process.exit(failures === 0 ? 0 : 1);
