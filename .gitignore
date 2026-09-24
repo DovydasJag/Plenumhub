@@ -3,5 +3,4 @@ __pycache__/
 *.pyc
 ad_unit.html
 consent_head.html
-ads.txt
 node_modules/
