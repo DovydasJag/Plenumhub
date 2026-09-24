@@ -1,5 +1,5 @@
 // Node-based unit tests for the new pure calculation functions in static/calc.js.
-// Run with: node --test tests/
+// Run with: node --test tests/calc.test.js
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');

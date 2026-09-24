@@ -254,6 +254,29 @@ async function run() {
     await page.waitForURL('**/home/electricity-cost-calculator/**');
   });
 
+  await check('EV Charging Cost Calculator: 1000 mi at 3.5 mi/kWh, $0.18/kWh vs 30 mpg at $3.50', async () => {
+    await page.goto(BASE + '/automotive/ev-charging-cost-calculator/');
+    await page.selectOption('#unit', 'imperial');
+    await page.fill('#dist_mi', '1000');
+    await page.fill('#eff_mi', '3.5');
+    await page.fill('#rate', '0.18');
+    await page.fill('#battery', '75');
+    await page.fill('#mpg', '30');
+    await page.fill('#fuel_gal', '3.50');
+    await page.click('button[type=submit]');
+    const t = await page.locator('#result').innerText();
+    assertContains(t, '58.44', 'monthly charging cost');
+    assertContains(t, '116.67', 'monthly gas cost');
+    assertContains(t, '58.23', 'monthly savings');
+    assertContains(t, '11 h 50 min', 'full charge time');
+  });
+
+  await check('EV Charging Cost Calculator: charging loss slider updates its label', async () => {
+    await page.goto(BASE + '/automotive/ev-charging-cost-calculator/');
+    await page.locator('#loss').fill('20');
+    assertContains(await page.locator('label[for=loss]').innerText(), '20%', 'slider label');
+  });
+
   await browser.close();
   console.log('\n' + (failures === 0 ? 'All Playwright checks passed.' : failures + ' Playwright check(s) FAILED.'));
   process.exit(failures === 0 ? 0 : 1);
