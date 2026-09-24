@@ -203,7 +203,10 @@ def layout(*, title, desc, path, body, calc=None, schema=None, noindex=False):
 </head>
 <body{calc_attr}>
 <header class="site"><div class="wrap">
-<a class="logo" href="/"><img src="/assets/favicon.svg?v={ASSET_VER}" width="28" height="28" alt="">{e(NAME)}</a>
+<a class="logo" href="/"><picture>
+<source media="(max-width: 599px)" srcset="/assets/favicon.svg?v={ASSET_VER}">
+<img src="/assets/logo.svg?v={ASSET_VER}" width="28" height="28" alt="">
+</picture>{e(NAME)}</a>
 <div class="search" role="search">
 <input type="search" id="site-search" placeholder="Search calculators…" aria-label="Search calculators" autocomplete="off">
 <ul id="search-results" class="search-results" hidden></ul>
