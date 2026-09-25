@@ -1,0 +1,16 @@
+{
+  "label": "Kitchen item",
+  "noun": "a kitchen item",
+  "words": [
+    "apron", "baster", "bin", "blender", "bowl", "breadbin", "breadboard", "cafetiere", "canister", "carafe",
+    "casserole", "chopper", "chopsticks", "cleaver", "coaster", "colander", "cooker", "corkscrew", "cruet",
+    "cup", "cutlery", "decanter", "dish", "dishcloth", "dishwasher", "eggcup", "flask", "fork", "freezer",
+    "fridge", "funnel", "glass", "goblet", "grater", "griddle", "grill", "hob", "jar", "jug", "juicer",
+    "kettle", "knife", "ladle", "lid", "mandoline", "masher", "microwave", "mincer", "mixer", "mortar", "mug",
+    "napkin", "oven", "pan", "peeler", "percolator", "pestle", "pitcher", "placemat", "plate", "platter", "pot",
+    "ramekin", "refrigerator", "saucepan", "saucer", "scales", "scoop", "sieve", "sifter", "sink", "skewer",
+    "skillet", "spatula", "sponge", "spoon", "steamer", "stockpot", "stove", "strainer", "tablecloth",
+    "tablespoon", "tagine", "tap", "teacup", "teapot", "teaspoon", "teatowel", "timer", "tin", "toaster",
+    "tongs", "tray", "trivet", "tumbler", "tureen", "whisk", "wok", "zester"
+  ]
+}

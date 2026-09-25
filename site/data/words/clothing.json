@@ -1,0 +1,22 @@
+{
+  "label": "Clothing",
+  "noun": "an item of clothing",
+  "words": [
+    "anorak", "apron", "balaclava", "bandana", "bathrobe", "beanie", "belt", "beret", "bikini", "blazer",
+    "blouse", "blouson", "bodice", "bodysuit", "bolero", "bonnet", "boot", "boots", "bowtie", "boxers", "bra",
+    "braces", "briefs", "brogues", "caftan", "cagoule", "camisole", "cap", "cape", "capris", "cardigan",
+    "chemise", "chinos", "cloak", "clogs", "coat", "corset", "cravat", "culottes", "cummerbund", "dress",
+    "dungarees", "earmuffs", "espadrilles", "fedora", "fleece", "frock", "galoshes", "gilet", "glove", "gloves",
+    "gown", "gumboots", "hat", "headband", "headscarf", "hijab", "hoodie", "housecoat", "jacket", "jeans",
+    "jersey", "jodhpurs", "joggers", "jumper", "jumpsuit", "kaftan", "kilt", "kimono", "knickers", "lederhosen",
+    "leggings", "leotard", "loafers", "mac", "mackintosh", "mitten", "mittens", "moccasins", "muffler",
+    "negligee", "nightdress", "nightgown", "nightie", "onesie", "overalls", "overcoat", "pajamas", "pants",
+    "parka", "pashmina", "peacoat", "petticoat", "pinafore", "plimsolls", "poncho", "pullover", "pyjamas",
+    "raincoat", "robe", "romper", "sandal", "sandals", "sari", "sarong", "sash", "scarf", "shawl", "shirt",
+    "shoe", "shoes", "shorts", "singlet", "skirt", "slacks", "slipper", "slippers", "smock", "sneakers",
+    "snood", "sock", "socks", "sombrero", "stetson", "stilettos", "stockings", "stole", "suit", "sweater",
+    "sweatpants", "sweatshirt", "swimsuit", "tabard", "tankini", "tie", "tights", "toga", "tracksuit",
+    "trainers", "trenchcoat", "trousers", "trunks", "tunic", "turban", "tuxedo", "underpants", "undershirt",
+    "veil", "vest", "waistcoat", "wellies", "wellingtons", "wetsuit", "windbreaker"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "label": "Body part",
+  "noun": "a body part",
+  "words": [
+    "abdomen", "ankle", "aorta", "appendix", "arm", "armpit", "artery", "back", "backbone", "belly", "bicep",
+    "biceps", "bladder", "bone", "bowel", "brain", "brow", "calf", "cartilage", "cheek", "cheekbone", "chest",
+    "chin", "clavicle", "collarbone", "colon", "cornea", "cranium", "cuticle", "diaphragm", "ear", "eardrum",
+    "earlobe", "elbow", "esophagus", "eye", "eyeball", "eyebrow", "eyelash", "eyelid", "face", "femur",
+    "fibula", "finger", "fingernail", "foot", "forearm", "forehead", "gallbladder", "gland", "gum", "gut",
+    "hair", "hamstring", "hand", "head", "heart", "heel", "hip", "humerus", "instep", "intestine", "iris",
+    "jaw", "jawbone", "kidney", "knee", "kneecap", "knuckle", "larynx", "leg", "ligament", "lip", "liver",
+    "lung", "mandible", "midriff", "molar", "mouth", "muscle", "nail", "nape", "navel", "neck", "nerve", "nose",
+    "nostril", "oesophagus", "ovary", "palm", "pancreas", "patella", "pelvis", "pupil", "retina", "rib",
+    "ribcage", "scalp", "scapula", "shin", "shinbone", "shoulder", "sinew", "sinus", "skin", "skull", "sole",
+    "spine", "spleen", "sternum", "stomach", "temple", "tendon", "thigh", "thorax", "throat", "thumb",
+    "thyroid", "tibia", "toe", "toenail", "tongue", "tonsil", "tooth", "torso", "trachea", "tricep", "triceps",
+    "tummy", "ulna", "uterus", "uvula", "vein", "vertebra", "waist", "windpipe", "womb", "wrist"
+  ]
+}

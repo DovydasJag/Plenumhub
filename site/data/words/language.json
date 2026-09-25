@@ -1,0 +1,18 @@
+{
+  "label": "Language",
+  "noun": "a language",
+  "words": [
+    "afrikaans", "albanian", "amharic", "arabic", "armenian", "basque", "belarusian", "bengali", "bosnian",
+    "bulgarian", "burmese", "cantonese", "catalan", "cherokee", "chinese", "cornish", "croatian", "czech",
+    "danish", "dutch", "english", "esperanto", "estonian", "farsi", "fijian", "filipino", "finnish", "flemish",
+    "french", "frisian", "gaelic", "galician", "georgian", "german", "greek", "gujarati", "hausa", "hawaiian",
+    "hebrew", "hindi", "hungarian", "icelandic", "igbo", "indonesian", "irish", "italian", "japanese",
+    "javanese", "kazakh", "khmer", "korean", "kurdish", "lao", "latin", "latvian", "lithuanian",
+    "luxembourgish", "macedonian", "malay", "malayalam", "maltese", "mandarin", "manx", "maori", "marathi",
+    "mongolian", "navajo", "nepali", "norwegian", "pashto", "persian", "polish", "portuguese", "punjabi",
+    "quechua", "romanian", "russian", "samoan", "sanskrit", "scots", "serbian", "sinhala", "slovak",
+    "slovenian", "somali", "spanish", "swahili", "swedish", "tagalog", "tamil", "telugu", "thai", "tibetan",
+    "tongan", "turkish", "ukrainian", "urdu", "uzbek", "vietnamese", "welsh", "xhosa", "yiddish", "yoruba",
+    "zulu"
+  ]
+}

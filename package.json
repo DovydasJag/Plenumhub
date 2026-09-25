@@ -1,0 +1,17 @@
+{
+  "name": "leftovers",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A daily word puzzle. Static site, no build step.",
+  "scripts": {
+    "serve": "node tools/serve.mjs 8090",
+    "generate": "node tools/generate.mjs",
+    "apply-config": "node tools/apply-config.mjs",
+    "test": "node --test \"test/*.test.mjs\"",
+    "e2e": "node e2e/play.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}

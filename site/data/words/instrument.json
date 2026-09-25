@@ -1,0 +1,15 @@
+{
+  "label": "Musical instrument",
+  "noun": "an instrument",
+  "words": [
+    "accordion", "bagpipes", "balalaika", "banjo", "bass", "bassoon", "bell", "bells", "bodhran", "bongo",
+    "bongos", "bouzouki", "bugle", "cajon", "castanets", "celesta", "cello", "chimes", "clarinet", "clavichord",
+    "concertina", "conga", "cornet", "cowbell", "cymbal", "cymbals", "didgeridoo", "djembe", "drum", "drums",
+    "dulcimer", "euphonium", "fiddle", "fife", "flugelhorn", "flute", "glockenspiel", "gong", "guitar",
+    "harmonica", "harmonium", "harp", "harpsichord", "horn", "kalimba", "kazoo", "keyboard", "koto", "lute",
+    "lyre", "mandolin", "maracas", "marimba", "melodica", "oboe", "ocarina", "organ", "oud", "piano",
+    "pianoforte", "piccolo", "recorder", "sax", "saxophone", "sitar", "snare", "sousaphone", "spinet", "synth",
+    "synthesiser", "synthesizer", "tabla", "tambourine", "theremin", "timpani", "triangle", "trombone",
+    "trumpet", "tuba", "ukulele", "vibraphone", "viola", "violin", "whistle", "xylophone", "zither"
+  ]
+}

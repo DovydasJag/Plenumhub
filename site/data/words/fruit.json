@@ -1,0 +1,16 @@
+{
+  "label": "Fruit",
+  "noun": "a fruit",
+  "words": [
+    "apple", "apricot", "avocado", "banana", "bilberry", "blackberry", "blackcurrant", "blueberry",
+    "boysenberry", "breadfruit", "cantaloupe", "cherry", "citron", "clementine", "cloudberry", "coconut",
+    "crabapple", "cranberry", "currant", "damson", "date", "dragonfruit", "durian", "elderberry", "fig",
+    "gooseberry", "grape", "grapefruit", "greengage", "guava", "honeydew", "huckleberry", "jackfruit", "kiwi",
+    "kiwifruit", "kumquat", "lemon", "lime", "lingonberry", "litchi", "loganberry", "loquat", "lychee",
+    "mandarin", "mango", "mangosteen", "medlar", "melon", "mulberry", "nectarine", "orange", "papaya",
+    "passionfruit", "pawpaw", "peach", "pear", "persimmon", "physalis", "pineapple", "plantain", "plum",
+    "pomegranate", "pomelo", "prune", "quince", "raisin", "rambutan", "raspberry", "redcurrant", "rhubarb",
+    "satsuma", "sloe", "soursop", "starfruit", "strawberry", "sultana", "tamarind", "tangerine", "tomato",
+    "ugli", "watermelon", "whitecurrant", "yuzu"
+  ]
+}

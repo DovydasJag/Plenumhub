@@ -1,0 +1,17 @@
+{
+  "label": "Capital city",
+  "noun": "a capital city",
+  "words": [
+    "abuja", "accra", "algiers", "amman", "amsterdam", "ankara", "astana", "asuncion", "athens", "baghdad",
+    "baku", "bangkok", "beijing", "beirut", "belfast", "belgrade", "berlin", "bern", "bogota", "brasilia",
+    "bratislava", "brussels", "bucharest", "budapest", "cairo", "canberra", "caracas", "cardiff", "copenhagen",
+    "dakar", "damascus", "delhi", "dhaka", "doha", "dublin", "edinburgh", "hanoi", "harare", "havana",
+    "helsinki", "islamabad", "jakarta", "kabul", "kampala", "kathmandu", "khartoum", "kiev", "kigali",
+    "kingston", "kinshasa", "kyiv", "lima", "lisbon", "ljubljana", "london", "luxembourg", "madrid", "managua",
+    "manila", "minsk", "mogadishu", "monaco", "montevideo", "moscow", "muscat", "nairobi", "nassau", "nicosia",
+    "oslo", "ottawa", "ouagadougou", "paris", "prague", "pretoria", "quito", "rabat", "reykjavik", "riga",
+    "riyadh", "rome", "santiago", "sarajevo", "seoul", "singapore", "sofia", "stockholm", "taipei", "tallinn",
+    "tashkent", "tbilisi", "tehran", "tirana", "tokyo", "tripoli", "tunis", "valletta", "vienna", "vilnius",
+    "warsaw", "washington", "wellington", "yerevan", "zagreb"
+  ]
+}

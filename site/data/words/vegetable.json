@@ -1,0 +1,14 @@
+{
+  "label": "Vegetable",
+  "noun": "a vegetable",
+  "words": [
+    "artichoke", "arugula", "asparagus", "aubergine", "avocado", "bean", "beet", "beetroot", "broccoli",
+    "butternut", "cabbage", "capsicum", "carrot", "cassava", "cauliflower", "celeriac", "celery", "chard",
+    "chickpea", "chicory", "chili", "chilli", "corn", "cornichon", "courgette", "cress", "cucumber", "daikon",
+    "edamame", "eggplant", "endive", "fennel", "garlic", "gherkin", "gourd", "horseradish", "jalapeno", "kale",
+    "kohlrabi", "leek", "lentil", "lettuce", "mangetout", "marrow", "mushroom", "okra", "onion", "parsnip",
+    "pea", "pepper", "plantain", "potato", "pumpkin", "radicchio", "radish", "rhubarb", "rocket", "romanesco",
+    "rutabaga", "samphire", "scallion", "shallot", "soybean", "spinach", "sprout", "squash", "swede",
+    "sweetcorn", "taro", "tomatillo", "tomato", "turnip", "watercress", "yam", "zucchini"
+  ]
+}

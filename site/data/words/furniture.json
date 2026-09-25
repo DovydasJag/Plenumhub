@@ -1,0 +1,11 @@
+{
+  "label": "Furniture",
+  "noun": "a piece of furniture",
+  "words": [
+    "armchair", "armoire", "beanbag", "bed", "bench", "bookcase", "bookshelf", "bureau", "cabinet", "chair",
+    "chest", "coatrack", "cot", "couch", "cradle", "credenza", "crib", "cupboard", "daybed", "deckchair",
+    "desk", "divan", "dresser", "footstool", "futon", "hammock", "hatstand", "highchair", "hutch", "lectern",
+    "lounger", "loveseat", "nightstand", "ottoman", "pew", "pouf", "pouffe", "recliner", "settee", "shelf",
+    "sideboard", "sofa", "sofabed", "stool", "table", "throne", "wardrobe", "workbench"
+  ]
+}

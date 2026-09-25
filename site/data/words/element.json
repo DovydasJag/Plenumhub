@@ -1,0 +1,14 @@
+{
+  "label": "Chemical element",
+  "noun": "an element",
+  "words": [
+    "aluminium", "aluminum", "americium", "antimony", "argon", "arsenic", "barium", "beryllium", "bismuth",
+    "boron", "bromine", "cadmium", "caesium", "calcium", "carbon", "cesium", "chlorine", "chromium", "cobalt",
+    "copper", "curium", "einsteinium", "fluorine", "francium", "gallium", "germanium", "gold", "helium",
+    "hydrogen", "iodine", "iridium", "iron", "krypton", "lead", "lithium", "magnesium", "manganese", "mercury",
+    "neodymium", "neon", "neptunium", "nickel", "nitrogen", "nobelium", "osmium", "oxygen", "palladium",
+    "phosphorus", "platinum", "plutonium", "polonium", "potassium", "radium", "radon", "rhodium", "selenium",
+    "silicon", "silver", "sodium", "strontium", "sulfur", "sulphur", "thorium", "tin", "titanium", "tungsten",
+    "uranium", "vanadium", "xenon", "zinc", "zirconium"
+  ]
+}

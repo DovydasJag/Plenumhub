@@ -1,0 +1,28 @@
+{
+  "label": "Job",
+  "noun": "a job",
+  "words": [
+    "accountant", "acrobat", "actor", "actress", "architect", "artist", "astronaut", "astronomer", "auctioneer",
+    "author", "baker", "banker", "barber", "barista", "barrister", "bartender", "beautician", "biologist",
+    "blacksmith", "bookkeeper", "botanist", "bricklayer", "broker", "builder", "busker", "butcher", "butler",
+    "captain", "carer", "carpenter", "cashier", "caterer", "chauffeur", "chef", "chemist", "childminder",
+    "chiropractor", "cleaner", "clerk", "clown", "coach", "cobbler", "composer", "conductor", "cook", "courier",
+    "croupier", "curator", "dancer", "decorator", "dentist", "designer", "detective", "dietitian", "diplomat",
+    "diver", "doctor", "driver", "economist", "editor", "electrician", "engineer", "farmer", "farrier",
+    "firefighter", "fireman", "fisherman", "fishmonger", "florist", "footballer", "forester", "gardener",
+    "geologist", "glazier", "grocer", "guard", "guide", "hairdresser", "historian", "housekeeper",
+    "illustrator", "interpreter", "janitor", "jeweler", "jeweller", "jockey", "joiner", "journalist", "judge",
+    "laborer", "labourer", "lawyer", "lecturer", "librarian", "lifeguard", "locksmith", "lumberjack",
+    "magician", "maid", "manager", "mason", "mechanic", "midwife", "milkman", "miner", "model", "musician",
+    "nanny", "navigator", "novelist", "nurse", "nutritionist", "optician", "optometrist", "paediatrician",
+    "painter", "paramedic", "pediatrician", "pharmacist", "photographer", "physicist", "physiotherapist",
+    "pianist", "pilot", "plasterer", "plumber", "poet", "policeman", "politician", "porter", "postman",
+    "potter", "priest", "printer", "producer", "professor", "programmer", "psychiatrist", "psychologist",
+    "publisher", "rabbi", "radiographer", "ranger", "receptionist", "referee", "reporter", "researcher",
+    "roofer", "sailor", "scientist", "sculptor", "secretary", "shepherd", "sheriff", "shopkeeper", "singer",
+    "soldier", "solicitor", "steward", "stewardess", "stockbroker", "surgeon", "surveyor", "tailor", "teacher",
+    "technician", "therapist", "tiler", "trader", "translator", "tutor", "typist", "umpire", "undertaker",
+    "upholsterer", "usher", "valet", "vet", "veterinarian", "vicar", "waiter", "waitress", "welder", "writer",
+    "zookeeper", "zoologist"
+  ]
+}

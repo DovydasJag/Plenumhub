@@ -1,0 +1,15 @@
+{
+  "label": "Flower",
+  "noun": "a flower",
+  "words": [
+    "amaryllis", "anemone", "aster", "azalea", "begonia", "bluebell", "bougainvillea", "buttercup", "camellia",
+    "camomile", "carnation", "chamomile", "chrysanthemum", "clematis", "cornflower", "cosmos", "cowslip",
+    "crocus", "cyclamen", "daffodil", "dahlia", "daisy", "dandelion", "delphinium", "edelweiss", "forsythia",
+    "foxglove", "freesia", "fuchsia", "gardenia", "geranium", "gerbera", "gladiolus", "heather", "hibiscus",
+    "hollyhock", "honeysuckle", "hyacinth", "hydrangea", "iris", "jasmine", "jonquil", "larkspur", "lavender",
+    "lilac", "lily", "lobelia", "lotus", "lupin", "lupine", "magnolia", "marigold", "mimosa", "narcissus",
+    "nasturtium", "orchid", "pansy", "peony", "periwinkle", "petunia", "poinsettia", "poppy", "primrose",
+    "primula", "protea", "ranunculus", "rhododendron", "rose", "snapdragon", "snowdrop", "sunflower", "thistle",
+    "tulip", "verbena", "violet", "wallflower", "wisteria", "zinnia"
+  ]
+}

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- cfg:head -->
+<title>Plenum: a daily word puzzle</title>
+<meta name="description" content="A daily word puzzle. One pool of letters, three categories. Use as many tiles as you can.">
+<link rel="canonical" href="https://plenumhub.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Plenum">
+<meta property="og:title" content="Plenum: a daily word puzzle">
+<meta property="og:description" content="A daily word puzzle. One pool of letters, three categories. Use as many tiles as you can.">
+<meta property="og:url" content="https://plenumhub.com/">
+<meta property="og:image" content="https://plenumhub.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Plenum, spelled out in wooden letter tiles">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f3eee3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#23201c" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20x%3D%221.5%22%20y%3D%221.5%22%20width%3D%2229%22%20height%3D%2229%22%20rx%3D%223%22%20fill%3D%22%23e6d3a8%22%20stroke%3D%22%237a6442%22%2F%3E%3Cpath%20d%3D%22M2%2026h28v2a2%202%200%200%201-2%202H4a2%202%200%200%201-2-2z%22%20fill%3D%22%23b39463%22%2F%3E%3Ctext%20x%3D%2216%22%20y%3D%2221.5%22%20text-anchor%3D%22middle%22%20font-family%3D%22IBM%20Plex%20Mono%2CMenlo%2CConsolas%2Cmonospace%22%20font-weight%3D%22700%22%20font-size%3D%2218%22%20fill%3D%22%231d1b18%22%3EP%3C%2Ftext%3E%3C%2Fsvg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&amp;display=swap">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7152450473146090" crossorigin="anonymous"></script>
+<script type="module" src="js/consent.js"></script>
+<!-- /cfg:head -->
+<link rel="stylesheet" href="css/site.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body class="game-page">
+<a class="skip" href="#board">Skip to the puzzle</a>
+<div class="page">
+  <header class="masthead">
+    <div class="nameplate">
+      <a class="wordmark" href="./" data-cfg="name">Plenum</a>
+      <nav class="masthead-links" aria-label="Help and stats">
+        <button type="button" class="textlink" data-open="help">How to play</button>
+        <button type="button" class="textlink" data-open="stats">Stats</button>
+      </nav>
+    </div>
+    <p class="folio"><span id="puzzle-no">No. &mdash;</span><time id="puzzle-date"></time></p>
+  </header>
+
+  <main id="game" class="game">
+    <section id="board" class="board" tabindex="-1" aria-label="Your three words"></section>
+
+    <section class="tray" aria-labelledby="tray-title">
+      <div class="tray-head">
+        <h2 id="tray-title" class="label">Today's letters</h2>
+        <span id="left-count" class="left-count"></span>
+        <button type="button" class="textlink" id="shuffle">Shuffle</button>
+      </div>
+      <div id="pool" class="pool" role="group" aria-label="Letter tiles"></div>
+    </section>
+
+    <div id="actions" class="actions">
+      <button type="button" class="btn" id="check">Check</button>
+      <button type="button" class="btn btn-ink" id="done">Done</button>
+    </div>
+    <p id="message" class="message"></p>
+
+    <section id="result" class="result" hidden aria-labelledby="result-title">
+      <div class="result-head">
+        <h2 id="result-title" tabindex="-1"></h2>
+        <span class="stamp" aria-hidden="true">Done</span>
+      </div>
+      <div class="best">
+        <h3 class="label" id="best-title">Best possible</h3>
+        <p id="best-same" class="best-same" hidden>Same as yours.</p>
+        <dl id="best-list" class="best-list"></dl>
+        <p class="best-left"><span>Left over</span> <span id="best-left"></span></p>
+      </div>
+      <div id="note" class="note" hidden>
+        <h3 class="label">Setter's note</h3>
+        <p id="note-text"></p>
+      </div>
+      <div class="share-row">
+        <button type="button" class="btn" id="share">Share</button>
+        <span id="copied" class="copied" role="status"></span>
+      </div>
+      <pre id="share-fallback" class="share-fallback" hidden></pre>
+      <p class="next">Next puzzle in <span id="countdown" class="countdown">&mdash;</span></p>
+    </section>
+
+    <div id="live" class="sr-only" aria-live="polite"></div>
+  </main>
+
+  <aside id="ad" class="ad" aria-label="Advertisement" hidden></aside>
+
+  <footer class="colophon">
+    <nav aria-label="About this site">
+      <a href="about/">About</a>
+      <a href="privacy/">Privacy</a>
+      <a href="contact/">Contact</a>
+      <a href="privacy/#consent" data-privacy-settings>Cookie settings</a>
+    </nav>
+    <p>A new puzzle every day at midnight, your time.</p>
+  </footer>
+</div>
+
+<dialog id="help" class="sheet" aria-labelledby="help-title">
+  <div class="sheet-head">
+    <h2 id="help-title">How to play</h2>
+    <button type="button" class="textlink" data-close>Close</button>
+  </div>
+  <p>Make a word for each category from the pool of letters. Each tile can only be used once. Words need three letters or more.</p>
+  <p>What's left over is your score, so fewer is better. Par is the best our word lists allow.</p>
+  <div class="example" aria-label="Example: letters C A T P E R U F I G O. Animal: cat. Country: Peru. Fruit: fig. One left: the O.">
+    <p class="label" aria-hidden="true">Example</p>
+    <div class="mini-tiles" aria-hidden="true"><span>c</span><span>a</span><span>t</span><span>p</span><span>e</span><span>r</span><span>u</span><span>f</span><span>i</span><span>g</span><span>o</span></div>
+    <dl class="example-words" aria-hidden="true">
+      <dt>Animal</dt><dd>cat</dd>
+      <dt>Country</dt><dd>peru</dd>
+      <dt>Fruit</dt><dd>fig</dd>
+    </dl>
+    <p aria-hidden="true">One left: the O.</p>
+  </div>
+  <p>Check as often as you like. Press Done when you're happy.</p>
+  <p class="sheet-foot"><button type="button" class="btn btn-ink" data-close autofocus>Play</button></p>
+</dialog>
+
+<dialog id="stats" class="sheet" aria-labelledby="stats-title" tabindex="-1">
+  <div class="sheet-head">
+    <h2 id="stats-title">Stats</h2>
+    <button type="button" class="textlink" data-close>Close</button>
+  </div>
+  <dl class="figures">
+    <div><dt>Played</dt><dd id="st-played">0</dd></div>
+    <div><dt>Current streak</dt><dd id="st-current">0</dd></div>
+    <div><dt>Best streak</dt><dd id="st-best">0</dd></div>
+  </dl>
+  <h3 class="label">Tiles left over, compared with par</h3>
+  <table class="dist">
+    <caption class="sr-only">How many puzzles you finished at par, one over, two over, and so on</caption>
+    <tbody id="st-dist"></tbody>
+  </table>
+  <p class="fineprint">Kept in this browser only. Nothing is sent anywhere.</p>
+</dialog>
+
+<noscript><p class="noscript">This puzzle needs JavaScript switched on. Sorry.</p></noscript>
+</body>
+</html>

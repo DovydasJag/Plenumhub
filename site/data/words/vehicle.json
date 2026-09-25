@@ -1,0 +1,15 @@
+{
+  "label": "Vehicle",
+  "noun": "a vehicle",
+  "words": [
+    "aeroplane", "airplane", "airship", "ambulance", "barge", "bicycle", "bike", "blimp", "boat", "buggy",
+    "bulldozer", "bus", "cab", "canoe", "car", "caravan", "carriage", "cart", "catamaran", "chariot", "coach",
+    "digger", "dinghy", "excavator", "ferry", "forklift", "galleon", "glider", "gondola", "hearse",
+    "helicopter", "hovercraft", "jeep", "jet", "kayak", "lifeboat", "limo", "limousine", "lorry", "minibus",
+    "minivan", "monorail", "moped", "motorbike", "motorcycle", "pickup", "plane", "punt", "quadbike", "raft",
+    "rickshaw", "rocket", "scooter", "ship", "sled", "sledge", "sleigh", "snowmobile", "spacecraft",
+    "speedboat", "stagecoach", "steamroller", "submarine", "tank", "tanker", "taxi", "tractor", "trailer",
+    "train", "tram", "trawler", "tricycle", "trolleybus", "truck", "tugboat", "unicycle", "van", "wagon",
+    "yacht", "zeppelin"
+  ]
+}

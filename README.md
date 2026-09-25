@@ -1,95 +1,75 @@
-# PlenumHub
+# Plenum
 
-A hub of free calculators grouped by topic ("niche"). Each niche has its own page at `/<niche>/` and its
-calculators live at `/<niche>/<calculator>/`. The first niche is Fitness: eight calculators (BMI, calorie, macro,
-body fat, ideal weight, water intake, pregnancy due date, heart rate zones). The site also has About, Contact,
-Privacy Policy, Terms of Use and Medical Disclaimer pages.
-Plain HTML/CSS/JS output: no database, no server code.
+A daily word puzzle. One pool of 12–15 letter tiles, three categories, one word per category.
+Score = tiles left over; lower is better. Plain HTML, CSS and JavaScript modules: the `site/` folder
+is the whole website and runs as-is, with no build step.
 
-## 1. Build the site
+## Before launch
 
-    python3 build.py --name "Your Site Name" --domain https://yourdomain.com --email you@yourdomain.com \
-      --operator "Your Name or Company" --address "Street, City, Postcode" --country Lithuania --host Cloudflare
+Edit `site/js/config.js`:
 
-This writes the finished site into the `dist/` folder. Upload the *contents* of `dist/`.
+- `name`: the site name
+- `launchDate`: the day puzzle No. 1 appears (the player's local date; the puzzle changes at local midnight)
+- `siteUrl`: **still `https://example.com`**. Used in share text, canonical and Open Graph tags, sitemap
+- `contactEmail`: **still a placeholder**
 
-`--operator`, `--address`, `--country` and `--host` fill in the Privacy Policy, Terms of Use and Contact pages.
-Anything you leave out shows as a yellow `[placeholder]` on those pages, and the build prints a WARNING. Do not
-publish while a warning is showing. A business address or PO box is fine for `--address`.
+Then run `npm run apply-config`. It writes those values into the page `<head>` tags, the visible name and
+email on each page, `sitemap.xml`, `robots.txt`, and redraws `og.png` and `apple-touch-icon.png`.
+A change to `launchDate` needs no command. `npm test` fails if the pages and the config disagree.
 
-## 2. Publish it (you only have the domain)
+## Running it
 
-Free option, recommended: Cloudflare Pages.
-1. Make a free Cloudflare account, then Workers & Pages > Create > Pages > Upload assets. Upload `dist/`.
-2. In Cloudflare, add your domain as a site. Cloudflare shows you two nameservers.
-3. In Hostinger: Domains > your domain > DNS / Nameservers > change to Cloudflare's two nameservers.
-4. In the Pages project, Custom domains > add your domain. It can take up to a few hours to go live.
+    npm install          # only needed for the Playwright tests and share-image drawing
+    npm run serve        # http://localhost:8090
 
-Alternative: buy a Hostinger web hosting plan and upload the contents of `dist/` to `public_html`.
+## Puzzles
 
-## 3. Add ads (after the site is live)
+`site/data/puzzles.json` holds 400 puzzles (just over a year). Each entry:
 
-1. Apply at Google AdSense (https://adsense.google.com) with your live domain.
-2. AdSense gives you a script for the `<head>`. Save it as `ads_head.html` next to `build.py`.
-3. When approved, create an ad unit and save its code as `ad_unit.html`. It appears in two places on every
-   calculator page and once on the homepage. Legal pages get no ads.
-4. AdSense also gives you an `ads.txt` line. Save it as `ads.txt` next to `build.py`.
-5. Rebuild and re-upload.
-6. For visitors in the EU/EEA, UK and Switzerland you need a Google-certified consent message. In AdSense turn on
-   Privacy & messaging, publish a GDPR message, and also the US state regulations message.
-7. The message is served by the AdSense script (`ads_head.html`) itself, so no extra file is needed. It only
-   starts showing once AdSense has fully approved the site. While ads are on, the build adds a "Privacy and cookie
-   settings" link to every footer, which reopens the message so visitors can change or withdraw consent. Before
-   relying on ads, check the message actually appears in a private window from an EU/UK connection.
-   (Only if you use a different consent tool instead: save its `<head>` script as `consent_head.html`; it loads
-   before the ad script.)
+    {"id": 12, "categories": ["animal", "country", "fruit"], "pool": "...", "par": 2, "solution": [...], "note": ""}
 
-Until `ad_unit.html` exists, no ad space is shown. Ad slots reserve 250px of height so the page does not jump when
-an ad loads; change `--ad-min` in `static/style.css` if you use smaller or larger units. Unfilled slots collapse.
+- **Setter's notes:** fill in `"note"`. It shows after the player presses Done, only when it isn't empty.
+- **More puzzles / edited word lists:** `npm run generate`. Existing puzzles are kept as they are (pool,
+  categories, notes), and par and the best solution are recalculated against the current word lists.
+  New puzzles are added up to `--count` (default 400). It prints a summary: puzzle count, par distribution,
+  pool sizes, category use, and every rejected candidate with the reason.
+- `npm run generate -- --fresh` starts over. It refuses if any notes are written unless you add `--force`.
 
-## Legal pages
+Rules the generator enforces: 3 categories (never Animal with Bird), one word from each totalling
+10–13 letters, plus 2–3 decoys, making a 12–15 tile pool. It rejects pools with more than 6 vowels,
+fewer than 3 vowels, a Q without a U, any letter four times, or more than two of J/Q/X/Z. It also rejects
+any puzzle whose par is 0, or where a category has fewer than 3 words that can be spelled from the pool.
 
-The Privacy Policy, Terms of Use, Medical Disclaimer, About and Contact pages are general templates, not legal
-advice. Once the real details are filled in, have a lawyer or a reputable policy generator review them, and
-re-read the Privacy Policy whenever you add analytics, affiliate links or another ad network.
+## Word lists
 
-## Adding another calculator
+One JSON file per category in `site/data/words/`: a label, the phrase used in messages
+("Not **an animal** we know."), and the words. Lowercase A–Z, three letters or more, single words, British
+and American spellings both. After editing, run `node tools/tidy-words.mjs` (sorts, de-duplicates,
+rejects bad entries) and then `npm run generate` so par is recalculated.
 
-1. Copy one file in `pages/` and edit the text (`slug`, `nav`, `title`, `intro`, `form`, `article`, `faqs`...).
-2. Set `niche="..."` to the slug of the niche it belongs to. If you leave it out, the calculator goes under
-   `fitness` and gets the medical disclaimer, so always set it for non-fitness calculators.
-3. Add the maths to `static/calc.js`: a function in `Calc`, plus a handler in `handlers` keyed by the page's
-   `calc` name.
-4. Add the slug to `order` in `build.py` so it appears in the right position (anything not listed goes last).
-5. Rebuild and check it locally (see below).
+## Tests
 
-## Adding a new niche
+    npm test             # unit tests: tile accounting, validation, dates and DST, share text, solver, puzzles, config
+    npm run e2e          # plays today's puzzle in Chromium on a 390px phone and a desktop; screenshots in e2e/screenshots/
 
-Add an entry to `NICHES` in `build.py`. Every key is required:
+## Deploying
 
-| Key | What it is |
-|---|---|
-| `slug` | URL folder, e.g. `finance` gives `/finance/` |
-| `name` | Short name for the top menu and breadcrumbs |
-| `icon` | Emoji shown on the homepage tile |
-| `tagline` | Heading and page title of the niche page |
-| `tile` | One-line description on the homepage tile |
-| `lead` | Intro paragraph under the niche page heading |
-| `desc` | Meta description for search engines |
-| `about` | HTML shown on the niche page below the calculator tiles |
-| `disclaimer` | HTML for the box near the bottom of every calculator in the niche |
+**GitHub Pages (plenumhub.com):** push to `main`. `.github/workflows/deploy.yml` runs the unit tests and,
+if they pass, publishes the `site` folder as-is. In the repo, Settings → Pages → Source must be
+"GitHub Actions", with the custom domain set there.
 
-Then add calculators to it as described above. The niche is added to the top menu, the homepage and the
-sitemap automatically. If the new topic needs its own legal wording (for example a financial disclaimer page),
-add a page in `pages/` with `kind="static"` and link to it from the niche's `disclaimer`.
+**Cloudflare Pages:** Workers & Pages → Create → Pages → Upload assets → upload the **`site`** folder
+(or connect the repo with no build command and output directory `site`). `site/_headers` sets cache times.
+If you move hosts, update the Hosting paragraph in the privacy policy.
 
-## Checking changes locally
+## Ads
 
-The pages link to `/assets/...`, so open them through a local server, not by double-clicking the files:
-
-    python3 build.py --name "PlenumHub" --domain https://plenumhub.com --email dovydasjagm@gmail.com \
-      --operator "Dovydas Jagminas" --address "Aukštagirio g. 18, Vilnius, 10105" --country Lithuania --host "GitHub Pages"
-    cd dist && python3 -m http.server 8000
-
-Then open http://localhost:8000. Pushing to `main` builds and deploys the live site automatically
-(`.github/workflows/deploy.yml`).
+- `adsenseClient` in the config puts AdSense's script in every page's `<head>` (not the 404 page), and
+  `site/ads.txt` carries the matching publisher line. Google's consent message for EEA/UK/Swiss visitors
+  comes through that same script once it's published in AdSense → Privacy & messaging. The "Cookie
+  settings" link in every footer reopens it.
+- Ad units: put one unit's code (the `<ins class="adsbygoogle">` and its `push({})` line, **not** the loader
+  script again) in `site/ads/snippet.html`. It appears in the slot below the game, never between the tiles
+  and the buttons. Until that file exists the slot renders nothing.
+- **Keep Auto ads off for this site** in AdSense (Ads → By site). Auto ads place themselves anywhere on the
+  page, including inside the game.

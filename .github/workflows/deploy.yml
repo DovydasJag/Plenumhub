@@ -15,32 +15,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.x"
+          node-version: 24
+      - name: Unit tests (word lists, puzzles, config, game rules)
+        run: node --test "test/*.test.mjs"
 
-      - name: Build site
-        run: |
-          python build.py \
-            --name "PlenumHub" \
-            --domain https://plenumhub.com \
-            --email dovydasjagm@gmail.com \
-            --operator "Dovydas Jagminas" \
-            --address "Aukštagirio g. 18, Vilnius, 10105" \
-            --country Lithuania \
-            --host "GitHub Pages"
-
-      - name: Add CNAME for custom domain
-        run: echo "plenumhub.com" > dist/CNAME
-
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
   deploy:
     needs: build

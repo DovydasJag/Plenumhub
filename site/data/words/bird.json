@@ -1,0 +1,19 @@
+{
+  "label": "Bird",
+  "noun": "a bird",
+  "words": [
+    "albatross", "blackbird", "bluebird", "budgerigar", "budgie", "bullfinch", "bunting", "bustard", "buzzard",
+    "canary", "cardinal", "cassowary", "chaffinch", "chick", "chicken", "cockatiel", "cockatoo", "cockerel",
+    "condor", "coot", "cormorant", "crane", "crow", "cuckoo", "curlew", "cygnet", "dodo", "dove", "duck",
+    "duckling", "eagle", "egret", "emu", "falcon", "finch", "flamingo", "gannet", "goldcrest", "goldfinch",
+    "goose", "goshawk", "gosling", "greenfinch", "grouse", "guillemot", "gull", "harrier", "hawk", "hen",
+    "heron", "hoopoe", "hornbill", "hummingbird", "ibis", "jackdaw", "jay", "kestrel", "kingfisher", "kite",
+    "kiwi", "kookaburra", "lapwing", "lark", "linnet", "lorikeet", "lovebird", "macaw", "magpie", "mallard",
+    "martin", "merlin", "moorhen", "mynah", "nightingale", "nightjar", "nuthatch", "oriole", "osprey",
+    "ostrich", "owl", "owlet", "parakeet", "parrot", "partridge", "peacock", "peahen", "pelican", "penguin",
+    "peregrine", "petrel", "pheasant", "pigeon", "plover", "ptarmigan", "puffin", "quail", "raven",
+    "roadrunner", "robin", "rook", "rooster", "sandpiper", "seagull", "skylark", "snipe", "sparrow", "starling",
+    "stork", "swallow", "swan", "swift", "teal", "tern", "thrush", "toucan", "turkey", "vulture", "wagtail",
+    "warbler", "waxwing", "woodcock", "woodpecker", "woodpigeon", "wren", "yellowhammer"
+  ]
+}

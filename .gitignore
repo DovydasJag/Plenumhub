@@ -1,6 +1,2 @@
-dist/
-__pycache__/
-*.pyc
-ad_unit.html
-consent_head.html
 node_modules/
+e2e/screenshots/

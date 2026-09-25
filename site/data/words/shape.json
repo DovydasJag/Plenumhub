@@ -1,0 +1,11 @@
+{
+  "label": "Shape",
+  "noun": "a shape",
+  "words": [
+    "chevron", "circle", "cone", "crescent", "cross", "cube", "cuboid", "cylinder", "decagon", "diamond",
+    "dodecagon", "dodecahedron", "ellipse", "heart", "hemisphere", "heptagon", "hexagon", "icosahedron", "kite",
+    "lozenge", "nonagon", "oblong", "octagon", "octahedron", "oval", "parallelogram", "pentagon", "polygon",
+    "prism", "pyramid", "quadrilateral", "rectangle", "rhombus", "semicircle", "sphere", "spiral", "square",
+    "star", "tetrahedron", "torus", "trapezium", "trapezoid", "triangle"
+  ]
+}

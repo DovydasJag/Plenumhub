@@ -1,0 +1,17 @@
+{
+  "label": "Sport",
+  "noun": "a sport",
+  "words": [
+    "aikido", "archery", "athletics", "badminton", "baseball", "basketball", "biathlon", "billiards", "bobsled",
+    "bobsleigh", "bodyboarding", "bowling", "bowls", "boxing", "canoeing", "cheerleading", "climbing",
+    "cricket", "croquet", "curling", "cycling", "darts", "decathlon", "diving", "dodgeball", "dressage",
+    "fencing", "floorball", "football", "futsal", "golf", "gymnastics", "handball", "heptathlon", "hockey",
+    "hurling", "judo", "jujitsu", "karate", "karting", "kayaking", "kendo", "kickboxing", "kitesurfing",
+    "korfball", "lacrosse", "luge", "motocross", "netball", "orienteering", "padel", "paragliding", "parkour",
+    "pentathlon", "pickleball", "polo", "pool", "powerlifting", "racquetball", "rafting", "rallying",
+    "rounders", "rowing", "rugby", "running", "sailing", "shinty", "shooting", "showjumping", "skateboarding",
+    "skating", "skeleton", "skiing", "skydiving", "snooker", "snowboarding", "soccer", "softball", "sprinting",
+    "squash", "sumo", "surfing", "swimming", "taekwondo", "tennis", "trampolining", "triathlon", "volleyball",
+    "wakeboarding", "weightlifting", "windsurfing", "wrestling"
+  ]
+}
